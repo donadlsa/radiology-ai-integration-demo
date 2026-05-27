@@ -1,0 +1,1092 @@
+{% extends "base.html" %}
+
+{% block title %}Major Incident Management{% endblock %}
+
+{% block page_title %}Major Incident Management{% endblock %}
+
+{% block content %}
+
+<!-- ============================================================
+     Active Incident Banner
+     ============================================================ -->
+<div id="incident-banner" class="incident-banner">
+    <div class="banner-icon">!</div>
+    <div class="banner-text">
+        <strong>ACTIVE P1</strong> &mdash; Charit&eacute; Berlin: HL7 interface down, ORM messages rejected &mdash;
+        <span id="elapsed-time">3h 45m</span> elapsed
+    </div>
+    <div class="banner-actions">
+        <button class="btn-banner" onclick="document.getElementById('incident-detail').scrollIntoView({behavior:'smooth'})">View Details</button>
+    </div>
+</div>
+
+<!-- ============================================================
+     Incident Detail Panel
+     ============================================================ -->
+<div id="incident-detail" class="incident-detail card">
+    <div class="incident-detail-header">
+        <h2>Incident Detail</h2>
+        <span class="incident-id mono">INC-2026-0843</span>
+    </div>
+
+    <div class="incident-meta-grid">
+        <div class="meta-item">
+            <span class="meta-label">Severity</span>
+            <span class="meta-value"><span class="incident-severity p1">P1 &mdash; Critical</span></span>
+        </div>
+        <div class="meta-item">
+            <span class="meta-label">Customer</span>
+            <span class="meta-value">Charit&eacute; Universit&auml;tsmedizin Berlin</span>
+        </div>
+        <div class="meta-item">
+            <span class="meta-label">Channel</span>
+            <span class="meta-value"><span class="channel-badge">HL7 v2.5</span></span>
+        </div>
+        <div class="meta-item">
+            <span class="meta-label">Assigned</span>
+            <span class="meta-value">Integration Team &mdash; EMEA On-Call</span>
+        </div>
+        <div class="meta-item">
+            <span class="meta-label">Commander</span>
+            <span class="meta-value fw-600">Adam Donaldson, Global Service Excellence Director</span>
+        </div>
+        <div class="meta-item meta-item-wide">
+            <span class="meta-label">Impact</span>
+            <span class="meta-value text-red">Radiology orders not reaching AI engine. AI analysis suspended for this site. ~15 studies/hour affected.</span>
+        </div>
+    </div>
+
+    <!-- Status Workflow -->
+    <div class="status-workflow-section">
+        <span class="meta-label">Status</span>
+        <div class="status-workflow" id="status-workflow">
+            <div class="status-step completed" data-step="0">
+                <div class="step-dot"></div>
+                <div class="step-label">Detected</div>
+            </div>
+            <div class="step-connector completed"></div>
+            <div class="status-step completed" data-step="1">
+                <div class="step-dot"></div>
+                <div class="step-label">Acknowledged</div>
+            </div>
+            <div class="step-connector completed"></div>
+            <div class="status-step active" data-step="2">
+                <div class="step-dot"></div>
+                <div class="step-label">Investigating</div>
+            </div>
+            <div class="step-connector"></div>
+            <div class="status-step" data-step="3">
+                <div class="step-dot"></div>
+                <div class="step-label">Mitigated</div>
+            </div>
+            <div class="step-connector"></div>
+            <div class="status-step" data-step="4">
+                <div class="step-dot"></div>
+                <div class="step-label">Resolved</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     Incident Timeline
+     ============================================================ -->
+<div id="incident-timeline" class="card">
+    <h2>Incident Timeline</h2>
+    <div class="timeline">
+
+        <div class="timeline-entry" data-type="system">
+            <div class="timeline-marker">
+                <div class="timeline-dot system"></div>
+                <div class="timeline-line"></div>
+            </div>
+            <div class="timeline-content">
+                <div class="timeline-header">
+                    <span class="timeline-time mono">06:50 UTC</span>
+                    <span class="timeline-badge system">SYSTEM</span>
+                </div>
+                <p>Automated alert: HL7 error rate exceeded 10% threshold for Charit&eacute; Berlin. Interface engine rejected 14 consecutive ORM^O01 messages with ACK code <code>AR</code> (Application Reject).</p>
+            </div>
+        </div>
+
+        <div class="timeline-entry" data-type="person">
+            <div class="timeline-marker">
+                <div class="timeline-dot person"></div>
+                <div class="timeline-line"></div>
+            </div>
+            <div class="timeline-content">
+                <div class="timeline-header">
+                    <span class="timeline-time mono">06:52 UTC</span>
+                    <span class="timeline-badge person">PERSON</span>
+                </div>
+                <p>Incident acknowledged by EMEA on-call engineer (Hannah Richter). Initial triage begun &mdash; confirmed alert is not a false positive.</p>
+            </div>
+        </div>
+
+        <div class="timeline-entry" data-type="person">
+            <div class="timeline-marker">
+                <div class="timeline-dot person"></div>
+                <div class="timeline-line"></div>
+            </div>
+            <div class="timeline-content">
+                <div class="timeline-header">
+                    <span class="timeline-time mono">06:55 UTC</span>
+                    <span class="timeline-badge person">PERSON</span>
+                </div>
+                <p>Severity escalated to P1 &mdash; customer-facing impact confirmed. All inbound radiology orders from Charit&eacute; failing. Incident Commander (Adam Donaldson) notified and bridge call opened.</p>
+            </div>
+        </div>
+
+        <div class="timeline-entry" data-type="person">
+            <div class="timeline-marker">
+                <div class="timeline-dot person"></div>
+                <div class="timeline-line"></div>
+            </div>
+            <div class="timeline-content">
+                <div class="timeline-header">
+                    <span class="timeline-time mono">07:05 UTC</span>
+                    <span class="timeline-badge person">PERSON</span>
+                </div>
+                <p>Root cause identified: Charit&eacute; changed sending facility code during weekend PACS maintenance. MSH-4 (Sending Facility) now transmits <code>CHARITE_NEW</code> instead of expected <code>CHARITE</code>. Interface engine routing table performs exact match on MSH-4 and rejected unrecognized facility.</p>
+            </div>
+        </div>
+
+        <div class="timeline-entry" data-type="person">
+            <div class="timeline-marker">
+                <div class="timeline-dot person"></div>
+                <div class="timeline-line"></div>
+            </div>
+            <div class="timeline-content">
+                <div class="timeline-header">
+                    <span class="timeline-time mono">07:15 UTC</span>
+                    <span class="timeline-badge person">PERSON</span>
+                </div>
+                <p>Temporary fix applied: added <code>CHARITE_NEW</code> as alias in interface engine routing table. Change deployed to production via expedited change process (Emergency CAB approval ref: CHG-2026-1104).</p>
+            </div>
+        </div>
+
+        <div class="timeline-entry" data-type="system">
+            <div class="timeline-marker">
+                <div class="timeline-dot system"></div>
+                <div class="timeline-line"></div>
+            </div>
+            <div class="timeline-content">
+                <div class="timeline-header">
+                    <span class="timeline-time mono">07:18 UTC</span>
+                    <span class="timeline-badge system">SYSTEM</span>
+                </div>
+                <p>HL7 message flow restored. First successful ORM^O01 accepted at 07:18:12 UTC. Monitoring for stability &mdash; error rate dropping.</p>
+            </div>
+        </div>
+
+        <div class="timeline-entry" data-type="system">
+            <div class="timeline-marker">
+                <div class="timeline-dot system"></div>
+                <div class="timeline-line"></div>
+            </div>
+            <div class="timeline-content">
+                <div class="timeline-header">
+                    <span class="timeline-time mono">07:45 UTC</span>
+                    <span class="timeline-badge system">SYSTEM</span>
+                </div>
+                <p>30-minute stability window passed. Error rate back to 0.3% (baseline). No further rejections. Incident status moved to Mitigated.</p>
+            </div>
+        </div>
+
+        <div class="timeline-entry" data-type="person">
+            <div class="timeline-marker">
+                <div class="timeline-dot person"></div>
+                <div class="timeline-line"></div>
+            </div>
+            <div class="timeline-content">
+                <div class="timeline-header">
+                    <span class="timeline-time mono">08:00 UTC</span>
+                    <span class="timeline-badge person">PERSON</span>
+                </div>
+                <p>Customer notified via email and Charit&eacute; IT liaison (Dr. Markus Lehmann). 12 studies queued during outage backlog &mdash; manual replay initiated. All backlogged studies processed successfully by 08:27 UTC.</p>
+            </div>
+        </div>
+
+        <div class="timeline-entry" data-type="person">
+            <div class="timeline-marker">
+                <div class="timeline-dot person"></div>
+                <div class="timeline-line last"></div>
+            </div>
+            <div class="timeline-content">
+                <div class="timeline-header">
+                    <span class="timeline-time mono">10:30 UTC</span>
+                    <span class="timeline-badge person">PERSON</span>
+                </div>
+                <p>Incident resolved. All systems nominal. Post-incident review scheduled for 2026-05-28 14:00 UTC. Final customer comms sent with RCA summary.</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ============================================================
+     Post-Incident Review Panel
+     ============================================================ -->
+<div id="pir-panel" class="card pir-panel">
+    <div class="pir-header">
+        <h2>Post-Incident Review &mdash; INC-2026-0843</h2>
+        <span class="status-badge green">Completed</span>
+    </div>
+
+    <!-- PIR Metrics Row -->
+    <div class="pir-metrics">
+        <div class="pir-metric-card">
+            <div class="pir-metric-value">3h 40m</div>
+            <div class="pir-metric-label">Total Duration</div>
+            <div class="pir-metric-sub">Detection to Resolution</div>
+        </div>
+        <div class="pir-metric-card">
+            <div class="pir-metric-value text-green">2 min</div>
+            <div class="pir-metric-label">Time to Acknowledge</div>
+            <div class="pir-metric-sub">Target: &lt; 5 min</div>
+        </div>
+        <div class="pir-metric-card">
+            <div class="pir-metric-value text-green">15 min</div>
+            <div class="pir-metric-label">Time to Root Cause</div>
+            <div class="pir-metric-sub">Target: &lt; 30 min</div>
+        </div>
+        <div class="pir-metric-card">
+            <div class="pir-metric-value text-green">28 min</div>
+            <div class="pir-metric-label">Time to Mitigate</div>
+            <div class="pir-metric-sub">Target: &lt; 60 min</div>
+        </div>
+    </div>
+
+    <!-- Root Cause -->
+    <div class="pir-section">
+        <h3>Root Cause</h3>
+        <p>Customer changed HL7 sending facility code (MSH-4) during scheduled PACS maintenance without notifying the integration team. The interface engine performs exact-match routing on MSH-4 and rejected all messages from the unrecognized facility identifier <code>CHARITE_NEW</code>. No alias or fuzzy-match mechanism existed in the routing configuration.</p>
+    </div>
+
+    <!-- Impact -->
+    <div class="pir-section">
+        <h3>Impact</h3>
+        <p>67 radiology orders were not processed during the 28-minute outage window. AI analysis was suspended for Charit&eacute; Berlin, affecting approximately 15 studies per hour. A 12-study backlog accumulated and was cleared within 30 minutes of service restoration. No patient safety events were reported &mdash; all orders were eventually processed.</p>
+    </div>
+
+    <!-- What Went Well -->
+    <div class="pir-section">
+        <h3>What Went Well</h3>
+        <ul class="pir-list went-well">
+            <li>Automated alerting detected the issue within 2 minutes of the first rejected message, well within our 5-minute SLO for detection</li>
+            <li>EMEA on-call engineer acknowledged the alert within 2 minutes &mdash; demonstrating strong on-call discipline and monitoring hygiene</li>
+            <li>Root cause identified in 15 minutes using HL7 diagnostic tooling (message trace + MSH field comparison against config registry)</li>
+            <li>Emergency change process was smooth &mdash; CAB approval obtained in under 5 minutes for the expedited routing table update</li>
+            <li>Customer communication was proactive and timely, with interim updates at 07:20 and 07:50 before formal resolution notice</li>
+        </ul>
+    </div>
+
+    <!-- What Needs Improvement -->
+    <div class="pir-section">
+        <h3>What Needs Improvement</h3>
+        <ul class="pir-list needs-improvement">
+            <li>No proactive notification from customer about planned PACS maintenance &mdash; change impacted integration without warning</li>
+            <li>Interface engine should accept facility code aliases, not just exact match &mdash; single character change caused full interface failure</li>
+            <li>Need automated backlog processing when interface is restored &mdash; manual replay of 12 studies took an additional 27 minutes</li>
+            <li>On-call runbook did not include MSH-4 facility code alias check &mdash; engineer had to rely on tribal knowledge to identify the issue</li>
+        </ul>
+    </div>
+
+    <!-- Action Items -->
+    <div class="pir-section">
+        <h3>Action Items</h3>
+        <div class="action-items-grid">
+
+            <div class="action-item">
+                <div class="action-header">
+                    <span class="action-category engineering">Engineering</span>
+                    <span class="action-due">Due: 2026-06-10</span>
+                </div>
+                <p class="action-description">Implement facility code alias mapping in interface engine &mdash; prevents single-point-of-failure on exact MSH-4 match. Support regex patterns and configurable alias lists per customer.</p>
+                <div class="action-footer">
+                    <span class="action-owner">Owner: Platform Team</span>
+                    <span class="action-status-tag open">Open</span>
+                </div>
+            </div>
+
+            <div class="action-item">
+                <div class="action-header">
+                    <span class="action-category process">Process</span>
+                    <span class="action-due">Due: 2026-06-03</span>
+                </div>
+                <p class="action-description">Add "planned maintenance notification" requirement to customer onboarding checklist. Include escalation path and minimum 48-hour notice window for changes affecting integration interfaces.</p>
+                <div class="action-footer">
+                    <span class="action-owner">Owner: Customer Success</span>
+                    <span class="action-status-tag open">Open</span>
+                </div>
+            </div>
+
+            <div class="action-item">
+                <div class="action-header">
+                    <span class="action-category tooling">Tooling</span>
+                    <span class="action-due">Due: 2026-06-17</span>
+                </div>
+                <p class="action-description">Build automated study backlog processor that queues and replays missed orders when interface is restored. Should detect gap in sequence numbers and trigger automatic catch-up within 5 minutes of reconnection.</p>
+                <div class="action-footer">
+                    <span class="action-owner">Owner: Integration Team</span>
+                    <span class="action-status-tag open">Open</span>
+                </div>
+            </div>
+
+            <div class="action-item">
+                <div class="action-header">
+                    <span class="action-category runbook">Runbook</span>
+                    <span class="action-due">Due: 2026-05-30</span>
+                </div>
+                <p class="action-description">Update "HL7 Interface Errors" runbook to include facility code alias check as Step 2 in the diagnostic flow. Add MSH-4 comparison against config registry as a standard triage action.</p>
+                <div class="action-footer">
+                    <span class="action-owner">Owner: Service Excellence</span>
+                    <span class="action-status-tag open">Open</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     Incident-Specific Styles
+     ============================================================ -->
+<style>
+/* --- Active Incident Banner --- */
+.incident-banner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 24px;
+    background: rgba(255, 71, 87, 0.12);
+    border: 1px solid var(--status-red);
+    border-radius: 8px;
+    margin-bottom: 28px;
+    animation: bannerPulse 3s ease-in-out infinite;
+}
+
+@keyframes bannerPulse {
+    0%, 100% { border-color: var(--status-red); box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
+    50%      { border-color: var(--status-red); box-shadow: 0 0 20px 0 rgba(255, 71, 87, 0.25); }
+}
+
+.banner-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--status-red);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.banner-text {
+    flex: 1;
+    font-size: 0.92rem;
+    color: var(--text-primary);
+}
+
+.banner-text strong {
+    color: var(--status-red);
+    letter-spacing: 0.04em;
+}
+
+.btn-banner {
+    padding: 6px 16px !important;
+    background: transparent !important;
+    color: var(--status-red) !important;
+    border: 1px solid var(--status-red) !important;
+    font-size: 0.78rem !important;
+    border-radius: 4px !important;
+    white-space: nowrap;
+}
+
+.btn-banner:hover {
+    background: rgba(255, 71, 87, 0.15) !important;
+}
+
+/* --- Incident Detail Panel --- */
+.incident-detail {
+    margin-bottom: 28px;
+}
+
+.incident-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+.incident-detail-header h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.incident-id {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    background: rgba(136, 153, 170, 0.1);
+    padding: 4px 12px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+}
+
+.incident-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px 24px;
+    margin-bottom: 24px;
+}
+
+.meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.meta-item-wide {
+    grid-column: 1 / -1;
+}
+
+.meta-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+}
+
+.meta-value {
+    font-size: 0.88rem;
+    color: var(--text-primary);
+}
+
+.text-red {
+    color: var(--status-red);
+}
+
+.channel-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: rgba(0, 212, 170, 0.12);
+    color: var(--accent);
+    border: 1px solid rgba(0, 212, 170, 0.25);
+}
+
+/* --- Status Workflow --- */
+.status-workflow-section {
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.status-workflow-section > .meta-label {
+    margin-bottom: 12px;
+}
+
+.status-workflow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 8px 0 4px;
+}
+
+.status-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 0 4px;
+    transition: opacity 0.2s;
+}
+
+.status-step:hover {
+    opacity: 0.85;
+}
+
+.step-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: transparent;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.status-step.completed .step-dot {
+    border-color: var(--accent);
+    background: var(--accent);
+}
+
+.status-step.completed .step-dot::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--bg-deep);
+}
+
+.status-step.active .step-dot {
+    border-color: var(--status-yellow);
+    background: var(--status-yellow);
+    box-shadow: 0 0 12px rgba(255, 193, 7, 0.4);
+}
+
+.status-step.active .step-dot::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--bg-deep);
+}
+
+.step-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+    transition: color 0.3s;
+}
+
+.status-step.completed .step-label {
+    color: var(--accent);
+}
+
+.status-step.active .step-label {
+    color: var(--status-yellow);
+}
+
+.step-connector {
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+    margin: 0 2px;
+    margin-bottom: 24px;
+    transition: background 0.3s;
+}
+
+.step-connector.completed {
+    background: var(--accent);
+}
+
+/* --- Incident Timeline --- */
+#incident-timeline h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+#incident-timeline {
+    margin-bottom: 28px;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 0;
+}
+
+.timeline-entry {
+    display: flex;
+    gap: 20px;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.timeline-entry.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.timeline-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 20px;
+}
+
+.timeline-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 4px;
+}
+
+.timeline-dot.system {
+    background: var(--accent);
+    box-shadow: 0 0 8px rgba(0, 212, 170, 0.3);
+}
+
+.timeline-dot.person {
+    background: #4da6ff;
+    box-shadow: 0 0 8px rgba(77, 166, 255, 0.3);
+}
+
+.timeline-line {
+    width: 2px;
+    flex: 1;
+    background: var(--border);
+    min-height: 20px;
+}
+
+.timeline-line.last {
+    background: transparent;
+}
+
+.timeline-content {
+    flex: 1;
+    padding-bottom: 24px;
+}
+
+.timeline-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+}
+
+.timeline-time {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.timeline-badge {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 3px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.timeline-badge.system {
+    background: rgba(0, 212, 170, 0.15);
+    color: var(--accent);
+}
+
+.timeline-badge.person {
+    background: rgba(77, 166, 255, 0.15);
+    color: #4da6ff;
+}
+
+.timeline-content p {
+    font-size: 0.84rem;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+.timeline-content code {
+    background: rgba(0, 212, 170, 0.1);
+    color: var(--accent);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 0.78rem;
+}
+
+/* --- PIR Panel --- */
+.pir-panel {
+    margin-bottom: 28px;
+}
+
+.pir-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+.pir-header h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* --- PIR Metrics Row --- */
+.pir-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.pir-metric-card {
+    background: rgba(10, 22, 40, 0.5);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 16px;
+    text-align: center;
+}
+
+.pir-metric-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+    line-height: 1.1;
+}
+
+.pir-metric-value.text-green {
+    color: var(--status-green);
+}
+
+.pir-metric-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    margin-top: 8px;
+}
+
+.pir-metric-sub {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    opacity: 0.6;
+    margin-top: 2px;
+}
+
+/* --- PIR Sections --- */
+.pir-section {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(42, 58, 74, 0.4);
+}
+
+.pir-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.pir-section h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.pir-section > p {
+    font-size: 0.84rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+.pir-section code {
+    background: rgba(0, 212, 170, 0.1);
+    color: var(--accent);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 0.78rem;
+}
+
+/* --- PIR Lists --- */
+.pir-list {
+    list-style: none;
+    padding: 0;
+}
+
+.pir-list li {
+    position: relative;
+    padding: 8px 0 8px 24px;
+    font-size: 0.84rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    border-bottom: 1px solid rgba(42, 58, 74, 0.25);
+}
+
+.pir-list li:last-child {
+    border-bottom: none;
+}
+
+.pir-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 14px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.pir-list.went-well li::before {
+    background: var(--status-green);
+}
+
+.pir-list.needs-improvement li::before {
+    background: var(--status-yellow);
+}
+
+/* --- Action Items Grid --- */
+.action-items-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.action-item {
+    background: rgba(10, 22, 40, 0.5);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 20px;
+    transition: border-color 0.2s;
+}
+
+.action-item:hover {
+    border-color: rgba(0, 212, 170, 0.25);
+}
+
+.action-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.action-category {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 3px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.action-category.engineering {
+    background: rgba(77, 166, 255, 0.15);
+    color: #4da6ff;
+}
+
+.action-category.process {
+    background: rgba(255, 193, 7, 0.15);
+    color: var(--status-yellow);
+}
+
+.action-category.tooling {
+    background: rgba(0, 212, 170, 0.15);
+    color: var(--accent);
+}
+
+.action-category.runbook {
+    background: rgba(180, 130, 255, 0.15);
+    color: #b482ff;
+}
+
+.action-due {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+}
+
+.action-description {
+    font-size: 0.82rem;
+    color: var(--text-primary);
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+.action-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.action-owner {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+}
+
+.action-status-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.action-status-tag.open {
+    background: rgba(255, 193, 7, 0.15);
+    color: var(--status-yellow);
+}
+
+.action-status-tag.done {
+    background: rgba(0, 212, 170, 0.15);
+    color: var(--status-green);
+}
+
+/* --- Responsive --- */
+@media (max-width: 1200px) {
+    .pir-metrics {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .incident-meta-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .action-items-grid {
+        grid-template-columns: 1fr;
+    }
+    .incident-meta-grid {
+        grid-template-columns: 1fr;
+    }
+    .pir-metrics {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .pir-metrics {
+        grid-template-columns: 1fr;
+    }
+    .status-workflow {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+    .step-connector {
+        display: none;
+    }
+}
+</style>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    'use strict';
+
+    // =========================================================
+    // Status Workflow — click to advance through incident states
+    // =========================================================
+    const workflow = document.getElementById('status-workflow');
+    if (workflow) {
+        const steps = workflow.querySelectorAll('.status-step');
+        const connectors = workflow.querySelectorAll('.step-connector');
+
+        steps.forEach(function(step) {
+            step.addEventListener('click', function() {
+                const clickedIndex = parseInt(this.getAttribute('data-step'), 10);
+
+                steps.forEach(function(s) {
+                    const idx = parseInt(s.getAttribute('data-step'), 10);
+                    s.classList.remove('completed', 'active');
+                    if (idx < clickedIndex) {
+                        s.classList.add('completed');
+                    } else if (idx === clickedIndex) {
+                        s.classList.add('active');
+                    }
+                });
+
+                connectors.forEach(function(c, i) {
+                    if (i < clickedIndex) {
+                        c.classList.add('completed');
+                    } else {
+                        c.classList.remove('completed');
+                    }
+                });
+
+                // Update banner based on state
+                updateBannerState(clickedIndex);
+            });
+        });
+    }
+
+    function updateBannerState(stepIndex) {
+        var banner = document.getElementById('incident-banner');
+        if (!banner) return;
+
+        if (stepIndex >= 4) {
+            // Resolved
+            banner.style.borderColor = 'var(--status-green)';
+            banner.style.background = 'rgba(0, 212, 170, 0.08)';
+            banner.style.animation = 'none';
+            banner.querySelector('.banner-icon').style.background = 'var(--status-green)';
+            banner.querySelector('.banner-text strong').style.color = 'var(--status-green)';
+            banner.querySelector('.banner-text strong').textContent = 'RESOLVED P1';
+        } else if (stepIndex >= 3) {
+            // Mitigated
+            banner.style.borderColor = 'var(--status-yellow)';
+            banner.style.background = 'rgba(255, 193, 7, 0.08)';
+            banner.style.animation = 'none';
+            banner.querySelector('.banner-icon').style.background = 'var(--status-yellow)';
+            banner.querySelector('.banner-text strong').style.color = 'var(--status-yellow)';
+            banner.querySelector('.banner-text strong').textContent = 'MITIGATED P1';
+        } else {
+            // Active states
+            banner.style.borderColor = '';
+            banner.style.background = '';
+            banner.style.animation = '';
+            banner.querySelector('.banner-icon').style.background = '';
+            banner.querySelector('.banner-text strong').style.color = '';
+            banner.querySelector('.banner-text strong').textContent = 'ACTIVE P1';
+        }
+    }
+
+    // =========================================================
+    // Timeline — stagger-reveal entries on page load
+    // =========================================================
+    var timelineEntries = document.querySelectorAll('.timeline-entry');
+    timelineEntries.forEach(function(entry, index) {
+        setTimeout(function() {
+            entry.classList.add('visible');
+        }, 150 + (index * 120));
+    });
+
+    // =========================================================
+    // Elapsed time counter — simulate a live timer
+    // =========================================================
+    var elapsedEl = document.getElementById('elapsed-time');
+    if (elapsedEl) {
+        var baseMinutes = 3 * 60 + 45; // 3h 45m in minutes
+        var startTime = Date.now();
+
+        function updateElapsed() {
+            var additionalSeconds = Math.floor((Date.now() - startTime) / 1000);
+            var totalMinutes = baseMinutes + Math.floor(additionalSeconds / 60);
+            var hours = Math.floor(totalMinutes / 60);
+            var mins = totalMinutes % 60;
+            var secs = additionalSeconds % 60;
+            elapsedEl.textContent = hours + 'h ' + mins + 'm ' + secs + 's';
+        }
+
+        updateElapsed();
+        setInterval(updateElapsed, 1000);
+    }
+
+})();
+</script>
+{% endblock %}

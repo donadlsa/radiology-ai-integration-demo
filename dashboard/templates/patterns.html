@@ -1,0 +1,529 @@
+{% extends "base.html" %}
+
+{% block title %}Recurring Incident Patterns{% endblock %}
+
+{% block page_title %}Recurring Incident Patterns{% endblock %}
+
+{% block content %}
+<style>
+    .page-intro {
+        color: var(--text-secondary, #8899aa);
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+        font-style: italic;
+        border-left: 3px solid var(--accent, #00d4aa);
+        padding-left: 1rem;
+    }
+
+    .pattern-summary {
+        background: var(--bg-card, #1b2838);
+        border: 1px solid var(--border, #2a3a4a);
+        border-radius: 8px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .pattern-summary .summary-text {
+        color: var(--text-primary, #e8edf3);
+        font-size: 0.95rem;
+        flex: 1;
+    }
+
+    .pattern-summary .summary-stat {
+        text-align: center;
+        min-width: 100px;
+    }
+
+    .pattern-summary .summary-stat .stat-number {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--accent, #00d4aa);
+        display: block;
+    }
+
+    .pattern-summary .summary-stat .stat-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary, #8899aa);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .pattern-card {
+        background: var(--bg-card, #1b2838);
+        border: 1px solid var(--border, #2a3a4a);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .pattern-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+        flex-wrap: wrap;
+    }
+
+    .pattern-header h3 {
+        color: var(--text-primary, #e8edf3);
+        font-size: 1.1rem;
+        margin: 0;
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .pattern-badges {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .badge-frequency {
+        background: rgba(255, 71, 87, 0.15);
+        color: var(--status-red, #ff4757);
+        border: 1px solid rgba(255, 71, 87, 0.3);
+    }
+
+    .badge-channel-dicom {
+        background: rgba(0, 212, 170, 0.12);
+        color: var(--accent, #00d4aa);
+        border: 1px solid rgba(0, 212, 170, 0.3);
+    }
+
+    .badge-channel-hl7 {
+        background: rgba(100, 149, 237, 0.15);
+        color: #6495ed;
+        border: 1px solid rgba(100, 149, 237, 0.3);
+    }
+
+    .badge-channel-fhir {
+        background: rgba(255, 193, 7, 0.15);
+        color: var(--status-yellow, #ffc107);
+        border: 1px solid rgba(255, 193, 7, 0.3);
+    }
+
+    .fix-category {
+        background: rgba(66, 133, 244, 0.15);
+        color: #4285f4;
+        border: 1px solid rgba(66, 133, 244, 0.3);
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .customer-tags {
+        display: flex;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+        margin-top: 0.5rem;
+    }
+
+    .customer-tags .tag {
+        background: rgba(136, 153, 170, 0.12);
+        color: var(--text-secondary, #8899aa);
+        border: 1px solid rgba(136, 153, 170, 0.2);
+        padding: 0.15rem 0.5rem;
+        border-radius: 3px;
+        font-size: 0.75rem;
+    }
+
+    .pattern-section {
+        margin-bottom: 1rem;
+        padding: 0.75rem 1rem;
+        background: rgba(13, 27, 42, 0.5);
+        border-radius: 6px;
+        border-left: 3px solid var(--border, #2a3a4a);
+    }
+
+    .pattern-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .pattern-section-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-secondary, #8899aa);
+        margin-bottom: 0.35rem;
+    }
+
+    .pattern-section-content {
+        color: var(--text-primary, #e8edf3);
+        font-size: 0.88rem;
+        line-height: 1.55;
+    }
+
+    .pattern-section.root-cause {
+        border-left-color: var(--status-red, #ff4757);
+    }
+
+    .pattern-section.workaround {
+        border-left-color: var(--status-yellow, #ffc107);
+    }
+
+    .pattern-section.fix {
+        border-left-color: var(--accent, #00d4aa);
+    }
+
+    .pattern-section.impact {
+        border-left-color: #4285f4;
+    }
+
+    .pattern-meta {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border, #2a3a4a);
+        flex-wrap: wrap;
+    }
+
+    .pattern-meta .meta-item {
+        font-size: 0.82rem;
+        color: var(--text-secondary, #8899aa);
+    }
+
+    .pattern-meta .meta-item strong {
+        color: var(--text-primary, #e8edf3);
+    }
+
+    .pattern-status {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+
+    .pattern-status.requested {
+        background: rgba(255, 193, 7, 0.15);
+        color: var(--status-yellow, #ffc107);
+        border: 1px solid rgba(255, 193, 7, 0.3);
+    }
+
+    .pattern-status.approved {
+        background: rgba(0, 212, 170, 0.15);
+        color: var(--accent, #00d4aa);
+        border: 1px solid rgba(0, 212, 170, 0.3);
+    }
+
+    .pattern-status.review {
+        background: rgba(136, 153, 170, 0.15);
+        color: var(--text-secondary, #8899aa);
+        border: 1px solid rgba(136, 153, 170, 0.3);
+    }
+
+    .pattern-status a {
+        color: inherit;
+        text-decoration: underline;
+        text-decoration-style: dotted;
+    }
+
+    .impact-summary {
+        background: var(--bg-card, #1b2838);
+        border: 1px solid var(--accent, #00d4aa);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .impact-summary h3 {
+        color: var(--accent, #00d4aa);
+        font-size: 1rem;
+        margin: 0 0 1rem 0;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .impact-summary .impact-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .impact-summary .impact-item {
+        text-align: center;
+        padding: 1rem;
+        background: rgba(13, 27, 42, 0.5);
+        border-radius: 6px;
+    }
+
+    .impact-summary .impact-item .impact-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--accent, #00d4aa);
+        display: block;
+    }
+
+    .impact-summary .impact-item .impact-label {
+        font-size: 0.8rem;
+        color: var(--text-secondary, #8899aa);
+        margin-top: 0.25rem;
+    }
+
+    .impact-summary .impact-detail {
+        font-size: 0.88rem;
+        color: var(--text-primary, #e8edf3);
+        padding: 0.4rem 0;
+        border-bottom: 1px solid rgba(42, 58, 74, 0.5);
+    }
+
+    .impact-summary .impact-detail:last-child {
+        border-bottom: none;
+    }
+
+    .impact-summary .impact-detail .improvement {
+        color: var(--accent, #00d4aa);
+        font-weight: 600;
+    }
+</style>
+
+<p class="page-intro">
+    Partner across the business — turn recurring incidents into permanent product fixes. This view detects patterns across customers and recommends engineering fixes.
+</p>
+
+<!-- Pattern Detection Summary -->
+<div class="pattern-summary">
+    <div class="summary-text">
+        Analyzing <strong>47 incidents</strong> across <strong>7 active customers</strong> in the last 30 days.
+    </div>
+    <div class="summary-stat">
+        <span class="stat-number">47</span>
+        <span class="stat-label">Incidents</span>
+    </div>
+    <div class="summary-stat">
+        <span class="stat-number">7</span>
+        <span class="stat-label">Customers</span>
+    </div>
+    <div class="summary-stat">
+        <span class="stat-number">3</span>
+        <span class="stat-label">Patterns Detected</span>
+    </div>
+</div>
+
+<!-- Pattern 1 -->
+<div class="pattern-card">
+    <div class="pattern-header">
+        <h3>Pattern #1: DICOM SR Series Description Rejected by PACS Worklist Filter</h3>
+        <div class="pattern-badges">
+            <span class="badge badge-frequency">4 occurrences</span>
+            <span class="badge badge-channel-dicom">DICOM</span>
+        </div>
+    </div>
+
+    <div class="customer-tags">
+        <span class="tag">Mayo Clinic</span>
+        <span class="tag">Guy's &amp; St Thomas'</span>
+        <span class="tag">Cleveland Clinic</span>
+    </div>
+
+    <div style="margin-top: 1rem;">
+        <div class="pattern-section root-cause">
+            <div class="pattern-section-label">Root Cause</div>
+            <div class="pattern-section-content">
+                Different PACS vendors filter their reading worklist by Series Description. Our AI engine sends SR with Series Description 'AI Analysis Report' but some PACS expect specific strings like 'AI_FINDINGS' or match on department-specific patterns.
+            </div>
+        </div>
+
+        <div class="pattern-section workaround">
+            <div class="pattern-section-label">Current Workaround</div>
+            <div class="pattern-section-content">
+                Manual update of SR Series Description in routing config per customer. Takes ~30 min per incident.
+            </div>
+        </div>
+
+        <div class="pattern-section fix">
+            <div class="pattern-section-label">Recommended Fix</div>
+            <div class="pattern-section-content">
+                Add configurable SR Series Description template per customer in the integration configuration. Default to 'AI Analysis Report' but allow override during onboarding.
+            </div>
+        </div>
+
+        <div class="pattern-section impact">
+            <div class="pattern-section-label">Impact if Fixed</div>
+            <div class="pattern-section-content">
+                Eliminates ~4 tickets/month, saves 2 hours/month of Tier 2 engineer time.
+            </div>
+        </div>
+    </div>
+
+    <div class="pattern-meta">
+        <div class="meta-item">
+            <span class="fix-category">Engineering — Integration Config</span>
+        </div>
+        <div class="meta-item">
+            Effort: <strong>2 sprint points</strong>
+        </div>
+        <div class="meta-item">
+            <span class="pattern-status requested">
+                Fix Requested — <a href="#">JIRA ENG-4521</a>
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Pattern 2 -->
+<div class="pattern-card">
+    <div class="pattern-header">
+        <h3>Pattern #2: HL7 Facility Code Changes After PACS Maintenance</h3>
+        <div class="pattern-badges">
+            <span class="badge badge-frequency">3 occurrences</span>
+            <span class="badge badge-channel-hl7">HL7</span>
+        </div>
+    </div>
+
+    <div class="customer-tags">
+        <span class="tag">Charit&eacute; Berlin</span>
+        <span class="tag">St Vincent's Sydney</span>
+    </div>
+
+    <div style="margin-top: 1rem;">
+        <div class="pattern-section root-cause">
+            <div class="pattern-section-label">Root Cause</div>
+            <div class="pattern-section-content">
+                When customers perform PACS upgrades or maintenance, the sending facility code in MSH-4 sometimes changes. Our interface engine does exact-match validation and rejects messages from unrecognized facilities.
+            </div>
+        </div>
+
+        <div class="pattern-section workaround">
+            <div class="pattern-section-label">Current Workaround</div>
+            <div class="pattern-section-content">
+                Manually add new facility code as alias in interface engine. P1 incident each time — average 3.5 hour resolution.
+            </div>
+        </div>
+
+        <div class="pattern-section fix">
+            <div class="pattern-section-label">Recommended Fix</div>
+            <div class="pattern-section-content">
+                1) Implement facility code alias mapping (accept multiple codes per customer).
+                2) Add proactive config validation check that runs after any customer-reported maintenance window.
+            </div>
+        </div>
+
+        <div class="pattern-section impact">
+            <div class="pattern-section-label">Impact if Fixed</div>
+            <div class="pattern-section-content">
+                Prevents P1 incidents. Estimated 10.5 hours saved per occurrence.
+            </div>
+        </div>
+    </div>
+
+    <div class="pattern-meta">
+        <div class="meta-item">
+            <span class="fix-category">Engineering — Interface Engine</span>
+        </div>
+        <div class="meta-item">
+            Effort: <strong>3 sprint points</strong>
+        </div>
+        <div class="meta-item">
+            <span class="pattern-status approved">Approved — Sprint 2026-06-A</span>
+        </div>
+    </div>
+</div>
+
+<!-- Pattern 3 -->
+<div class="pattern-card">
+    <div class="pattern-header">
+        <h3>Pattern #3: FHIR Token Expiry During Weekend/Holiday</h3>
+        <div class="pattern-badges">
+            <span class="badge badge-frequency">5 occurrences</span>
+            <span class="badge badge-channel-fhir">FHIR</span>
+        </div>
+    </div>
+
+    <div class="customer-tags">
+        <span class="tag">4 customers affected</span>
+    </div>
+
+    <div style="margin-top: 1rem;">
+        <div class="pattern-section root-cause">
+            <div class="pattern-section-label">Root Cause</div>
+            <div class="pattern-section-content">
+                OAuth2 tokens for FHIR server access have 24-48 hour TTL. Token refresh runs on a schedule but fails silently when the customer's identity provider has maintenance windows on weekends. No alert fires until FHIR submissions start failing.
+            </div>
+        </div>
+
+        <div class="pattern-section workaround">
+            <div class="pattern-section-label">Current Workaround</div>
+            <div class="pattern-section-content">
+                Manual token refresh via API call. Tier 1 can resolve in 15 minutes but only after customer reports the issue.
+            </div>
+        </div>
+
+        <div class="pattern-section fix">
+            <div class="pattern-section-label">Recommended Fix</div>
+            <div class="pattern-section-content">
+                1) Add proactive token health check — verify token validity every 4 hours with a test request.
+                2) Alert on token refresh failure, not just submission failure.
+                3) Implement automatic token retry with exponential backoff.
+            </div>
+        </div>
+
+        <div class="pattern-section impact">
+            <div class="pattern-section-label">Impact if Fixed</div>
+            <div class="pattern-section-content">
+                Eliminates 5 tickets/month. Converts reactive weekend incidents to proactive weekday maintenance.
+            </div>
+        </div>
+    </div>
+
+    <div class="pattern-meta">
+        <div class="meta-item">
+            <span class="fix-category">Engineering — Auth &amp; Platform</span>
+        </div>
+        <div class="meta-item">
+            Effort: <strong>5 sprint points</strong>
+        </div>
+        <div class="meta-item">
+            <span class="pattern-status review">Under Review — Product Team</span>
+        </div>
+    </div>
+</div>
+
+<!-- Impact Summary -->
+<div class="impact-summary">
+    <h3>Aggregate Impact Summary</h3>
+
+    <div class="impact-grid">
+        <div class="impact-item">
+            <span class="impact-number">~12</span>
+            <span class="impact-label">Fewer tickets/month</span>
+        </div>
+        <div class="impact-item">
+            <span class="impact-number">~15 hrs</span>
+            <span class="impact-label">Engineer time saved/month</span>
+        </div>
+        <div class="impact-item">
+            <span class="impact-number">2 fewer</span>
+            <span class="impact-label">P1 incidents/quarter</span>
+        </div>
+    </div>
+
+    <div class="impact-detail">
+        Ticket deflection rate improvement: <span class="improvement">estimated +8%</span>
+    </div>
+    <div class="impact-detail">
+        First-contact resolution improvement: <span class="improvement">estimated +12%</span> (Tier 1 won't see these tickets at all)
+    </div>
+</div>
+{% endblock %}

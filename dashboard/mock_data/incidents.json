@@ -1,0 +1,86 @@
+[
+  {
+    "id": "INC-2026-0847",
+    "customer_id": "royal-melbourne",
+    "severity": "P2",
+    "title": "FHIR DiagnosticReport submission 504 timeout",
+    "status": "investigating",
+    "opened": "2026-05-27T06:15:00Z",
+    "resolved": null,
+    "channel": "fhir",
+    "assigned_to": "Platform Team",
+    "description": "Intermittent 504 errors when POSTing DiagnosticReport bundles to RMH FHIR server. Appears related to large result sets with >5 observations."
+  },
+  {
+    "id": "INC-2026-0843",
+    "customer_id": "charite-berlin",
+    "severity": "P1",
+    "title": "HL7 interface down - ORM messages rejected",
+    "status": "investigating",
+    "opened": "2026-05-27T06:50:00Z",
+    "resolved": null,
+    "channel": "hl7",
+    "assigned_to": "Integration Team",
+    "description": "Charite HL7 interface rejecting ORM^O01 messages with NAK. Error: 'Unknown sending facility'. Possible config change on their side after weekend maintenance."
+  },
+  {
+    "id": "INC-2026-0840",
+    "customer_id": "singapore-general",
+    "severity": "P3",
+    "title": "DICOM C-STORE timeouts on CT series",
+    "status": "monitoring",
+    "opened": "2026-05-26T22:10:00Z",
+    "resolved": null,
+    "channel": "dicom",
+    "assigned_to": "Integration Team",
+    "description": "Intermittent timeouts when receiving large CT series (>200 slices). Single CR images unaffected. Possible bandwidth constraint."
+  },
+  {
+    "id": "INC-2026-0835",
+    "customer_id": "st-vincents-sydney",
+    "severity": "P3",
+    "title": "HL7 ADT messages arriving with truncated PID segments",
+    "status": "investigating",
+    "opened": "2026-05-26T14:30:00Z",
+    "resolved": null,
+    "channel": "hl7",
+    "assigned_to": "Integration Team",
+    "description": "4.2% of ADT^A08 messages from SVH have truncated PID-11 (address) fields. Parser handles gracefully but demographics sync is incomplete."
+  },
+  {
+    "id": "INC-2026-0830",
+    "customer_id": "nhs-guys-st-thomas",
+    "severity": "P3",
+    "title": "FHIR Observation resource validation warnings",
+    "status": "resolved",
+    "opened": "2026-05-25T11:00:00Z",
+    "resolved": "2026-05-25T15:30:00Z",
+    "channel": "fhir",
+    "assigned_to": "Platform Team",
+    "description": "GSTT FHIR server returning warnings on Observation.component cardinality. Root cause: their server updated to stricter R4B validation. Fixed by updating bundle format."
+  },
+  {
+    "id": "INC-2026-0822",
+    "customer_id": "mayo-clinic-rochester",
+    "severity": "P2",
+    "title": "DICOM SR not appearing in radiologist worklist",
+    "status": "resolved",
+    "opened": "2026-05-24T16:45:00Z",
+    "resolved": "2026-05-24T19:20:00Z",
+    "channel": "dicom",
+    "assigned_to": "Integration Team",
+    "description": "AI Structured Reports sent to MCR PACS but not populating in reading worklist. Root cause: SR Series Description didn't match their worklist filter. Fixed routing tag."
+  },
+  {
+    "id": "INC-2026-0818",
+    "customer_id": "cleveland-clinic",
+    "severity": "P3",
+    "title": "Duplicate ORM orders received during Epic upgrade",
+    "status": "resolved",
+    "opened": "2026-05-23T20:00:00Z",
+    "resolved": "2026-05-24T08:15:00Z",
+    "channel": "hl7",
+    "assigned_to": "Integration Team",
+    "description": "CCF Epic upgrade caused duplicate ORM^O01 messages for same accession number. De-duplication logic caught 98% but 3 studies were processed twice. Added accession-based idempotency check."
+  }
+]

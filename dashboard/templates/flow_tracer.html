@@ -1,0 +1,737 @@
+{% extends "base.html" %}
+
+{% block title %}Integration Flow Tracer{% endblock %}
+
+{% block page_title %}Integration Flow Tracer{% endblock %}
+
+{% block content %}
+<style>
+/* ============================================
+   Flow Tracer — Pipeline Visualization
+   ============================================ */
+
+.flow-description {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    line-height: 1.7;
+    max-width: 760px;
+}
+
+.flow-controls {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+}
+
+.flow-controls label {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.flow-controls select {
+    padding: 9px 14px;
+    background: var(--bg-deep);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.84rem;
+    min-width: 420px;
+    transition: border-color 0.15s;
+}
+
+.flow-controls select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(0, 212, 170, 0.12);
+}
+
+.runbook-link {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 8px 16px;
+    background: rgba(255, 71, 87, 0.1);
+    border: 1px solid var(--status-red);
+    border-radius: 6px;
+    color: var(--status-red);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+.runbook-link:hover {
+    background: rgba(255, 71, 87, 0.2);
+    text-decoration: none;
+}
+
+.btn-sample {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 9px 20px;
+    border-radius: 6px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.btn-sample:hover {
+    background: rgba(0, 212, 170, 0.1);
+    color: #00e6b8;
+}
+
+/* --- Pipeline Container --- */
+.pipeline-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    padding: 28px 0 36px;
+    margin-bottom: 36px;
+    overflow-x: auto;
+    position: relative;
+}
+
+/* --- Pipeline Stage Card --- */
+.pipeline-stage {
+    width: 180px;
+    min-width: 180px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0;
+    position: relative;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    overflow: hidden;
+}
+
+.pipeline-stage .stage-top-bar {
+    height: 4px;
+    background: var(--text-secondary);
+    transition: background 0.4s;
+}
+
+.pipeline-stage.stage-pending .stage-top-bar {
+    background: var(--text-secondary);
+}
+
+.pipeline-stage.stage-running .stage-top-bar {
+    background: #4da6ff;
+    animation: pulse-bar 1.2s ease-in-out infinite;
+}
+
+.pipeline-stage.stage-pass .stage-top-bar {
+    background: var(--status-green);
+}
+
+.pipeline-stage.stage-fail .stage-top-bar {
+    background: var(--status-red);
+}
+
+.pipeline-stage.stage-warn .stage-top-bar {
+    background: var(--status-yellow);
+}
+
+@keyframes pulse-bar {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.pipeline-stage.stage-running {
+    border-color: rgba(77, 166, 255, 0.5);
+    box-shadow: 0 0 16px rgba(77, 166, 255, 0.15);
+}
+
+.pipeline-stage.stage-pass {
+    border-color: rgba(0, 212, 170, 0.35);
+    box-shadow: 0 0 12px rgba(0, 212, 170, 0.08);
+}
+
+.pipeline-stage.stage-fail {
+    border-color: rgba(255, 71, 87, 0.4);
+    box-shadow: 0 0 12px rgba(255, 71, 87, 0.1);
+}
+
+.pipeline-stage .stage-body {
+    padding: 14px 16px;
+}
+
+.pipeline-stage .stage-number {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+}
+
+.pipeline-stage .stage-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    line-height: 1.3;
+}
+
+.pipeline-stage .stage-protocol {
+    font-size: 0.68rem;
+    font-family: var(--font-mono);
+    color: var(--accent);
+    background: rgba(0, 212, 170, 0.08);
+    padding: 2px 7px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.stage-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+    margin-top: 6px;
+}
+
+.stage-status .status-icon {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.stage-running .stage-status .status-icon {
+    background: #4da6ff;
+    animation: pulse-dot 1s ease-in-out infinite;
+}
+
+.stage-pass .stage-status .status-icon {
+    background: var(--status-green);
+}
+
+.stage-fail .stage-status .status-icon {
+    background: var(--status-red);
+}
+
+.stage-warn .stage-status .status-icon {
+    background: var(--status-yellow);
+}
+
+@keyframes pulse-dot {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.5; }
+}
+
+.stage-summary {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 6px;
+    line-height: 1.4;
+    min-height: 18px;
+}
+
+/* --- Pipeline Arrow --- */
+.pipeline-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    min-width: 48px;
+    align-self: center;
+    position: relative;
+    height: 2px;
+    margin-top: 50px;
+}
+
+.pipeline-arrow::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: var(--border);
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.pipeline-arrow::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 8px solid var(--border);
+}
+
+.pipeline-arrow.active::before {
+    background: var(--accent);
+}
+
+.pipeline-arrow.active::after {
+    border-left-color: var(--accent);
+}
+
+/* --- Pipeline Branch (for output stages 4a/4b/4c) --- */
+.pipeline-branch {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    padding-left: 28px;
+}
+
+.pipeline-branch::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 30px;
+    bottom: 30px;
+    width: 2px;
+    background: var(--border);
+}
+
+.pipeline-branch .branch-connector {
+    position: relative;
+}
+
+.pipeline-branch .branch-connector::before {
+    content: '';
+    position: absolute;
+    left: -28px;
+    top: 50%;
+    width: 28px;
+    height: 2px;
+    background: var(--border);
+}
+
+.pipeline-branch .pipeline-stage {
+    width: 180px;
+    min-width: 180px;
+}
+
+.pipeline-branch-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    min-width: 48px;
+    align-self: center;
+    position: relative;
+    height: 2px;
+}
+
+.pipeline-branch-arrow::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: var(--border);
+}
+
+.pipeline-branch-arrow::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 8px solid var(--border);
+}
+
+/* --- Trace Detail Sections --- */
+#trace-details {
+    margin-top: 8px;
+}
+
+.trace-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    transition: border-color 0.3s;
+}
+
+.trace-section.pass {
+    border-left: 3px solid var(--status-green);
+}
+
+.trace-section.fail {
+    border-left: 3px solid var(--status-red);
+}
+
+.trace-section.warn {
+    border-left: 3px solid var(--status-yellow);
+}
+
+.trace-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+}
+
+.trace-section-header:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.trace-section-header .section-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.trace-section-header .section-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.trace-section-header .section-subtitle {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.trace-section-header .expand-icon {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    transition: transform 0.2s;
+}
+
+.trace-section-header .expand-icon.open {
+    transform: rotate(90deg);
+}
+
+.trace-section-body {
+    padding: 0 20px 18px;
+    display: none;
+}
+
+.trace-section-body.open {
+    display: block;
+}
+
+.trace-section-body .field-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    font-size: 0.82rem;
+    border-bottom: 1px solid rgba(42, 58, 74, 0.3);
+}
+
+.trace-section-body .field-row:last-child {
+    border-bottom: none;
+}
+
+.trace-section-body .field-row .field-key {
+    color: var(--text-secondary);
+    font-weight: 500;
+    min-width: 160px;
+}
+
+.trace-section-body .field-row .field-val {
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    text-align: right;
+    word-break: break-all;
+}
+
+.trace-section-body h4 {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 14px 0 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+}
+
+.trace-section-body h4:first-child {
+    margin-top: 0;
+}
+
+.code-block {
+    background: rgba(10, 22, 40, 0.6);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 8px;
+}
+
+.code-toggle {
+    font-size: 0.76rem;
+    color: var(--accent);
+    cursor: pointer;
+    margin-top: 8px;
+    display: inline-block;
+    user-select: none;
+}
+
+.code-toggle:hover {
+    text-decoration: underline;
+}
+
+.finding-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: rgba(0, 212, 170, 0.06);
+    border: 1px solid rgba(0, 212, 170, 0.2);
+    border-radius: 20px;
+    margin: 4px 6px 4px 0;
+    font-size: 0.78rem;
+}
+
+.finding-pill .finding-name {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.finding-pill .finding-conf {
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.76rem;
+}
+
+/* --- Summary Card --- */
+.flow-summary {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px 28px;
+    margin-top: 24px;
+    display: none;
+}
+
+.flow-summary.visible {
+    display: block;
+}
+
+.flow-summary .summary-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.flow-summary .summary-counts {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+}
+
+.flow-summary .summary-counts span {
+    font-weight: 600;
+    font-family: var(--font-mono);
+}
+
+.flow-summary .summary-message {
+    font-size: 0.88rem;
+    line-height: 1.6;
+}
+
+.flow-summary.healthy {
+    border-color: rgba(0, 212, 170, 0.3);
+    border-left: 4px solid var(--status-green);
+}
+
+.flow-summary.issues {
+    border-color: rgba(255, 71, 87, 0.3);
+    border-left: 4px solid var(--status-red);
+}
+
+.flow-summary .overall-badge {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 14px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.flow-summary .overall-badge.healthy {
+    background: rgba(0, 212, 170, 0.15);
+    color: var(--status-green);
+}
+
+.flow-summary .overall-badge.issues {
+    background: rgba(255, 71, 87, 0.15);
+    color: var(--status-red);
+}
+
+/* --- Responsive --- */
+@media (max-width: 1100px) {
+    .pipeline-container {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+</style>
+
+<!-- Description & Controls -->
+<div class="flow-description">
+    Trace the end-to-end integration flow for a radiology study. Enter an accession number
+    or use sample data to see how orders, images, and AI results flow through HL7v2, DICOM, and FHIR.
+</div>
+
+<div class="flow-controls">
+    <label for="accession-input">Scenario</label>
+    <select id="accession-input">
+        <option value="ACC-20260115-5678">ACC-20260115-5678 — Chest X-ray (All Healthy)</option>
+        <option value="ACC-20260220-1234">ACC-20260220-1234 — CT Head (AE Title Mismatch)</option>
+        <option value="ACC-20260305-9012">ACC-20260305-9012 — Chest X-ray (Patient Mismatch)</option>
+        <option value="ACC-20260412-3456">ACC-20260412-3456 — CT Chest (SR Not Linked to Study)</option>
+        <option value="ACC-20260501-7890">ACC-20260501-7890 — Portable CXR (Critical Result Undelivered)</option>
+        <option value="ACC-20260515-2345">ACC-20260515-2345 — MRI Brain (FHIR Validation Error)</option>
+    </select>
+    <button id="trace-btn">Trace Flow</button>
+</div>
+
+<!-- Pipeline Visualization -->
+<div id="pipeline-view" class="pipeline-container">
+
+    <!-- Stage 1: Order Received -->
+    <div class="pipeline-stage stage-pending" id="stage-1">
+        <div class="stage-top-bar"></div>
+        <div class="stage-body">
+            <div class="stage-number">Stage 1</div>
+            <div class="stage-name">Order Received</div>
+            <span class="stage-protocol">HL7v2 ORM^O01</span>
+            <div class="stage-status">
+                <span class="status-icon"></span>
+                <span class="status-text">Pending</span>
+            </div>
+            <div class="stage-summary" id="stage-1-summary"></div>
+        </div>
+    </div>
+
+    <div class="pipeline-arrow" id="arrow-1-2"></div>
+
+    <!-- Stage 2: Image Arrives -->
+    <div class="pipeline-stage stage-pending" id="stage-2">
+        <div class="stage-top-bar"></div>
+        <div class="stage-body">
+            <div class="stage-number">Stage 2</div>
+            <div class="stage-name">Image Arrives</div>
+            <span class="stage-protocol">DICOM C-STORE</span>
+            <div class="stage-status">
+                <span class="status-icon"></span>
+                <span class="status-text">Pending</span>
+            </div>
+            <div class="stage-summary" id="stage-2-summary"></div>
+        </div>
+    </div>
+
+    <div class="pipeline-arrow" id="arrow-2-3"></div>
+
+    <!-- Stage 3: AI Analysis -->
+    <div class="pipeline-stage stage-pending" id="stage-3">
+        <div class="stage-top-bar"></div>
+        <div class="stage-body">
+            <div class="stage-number">Stage 3</div>
+            <div class="stage-name">AI Analysis</div>
+            <span class="stage-protocol">harrison.ai Engine</span>
+            <div class="stage-status">
+                <span class="status-icon"></span>
+                <span class="status-text">Pending</span>
+            </div>
+            <div class="stage-summary" id="stage-3-summary"></div>
+        </div>
+    </div>
+
+    <div class="pipeline-branch-arrow" id="arrow-3-branch"></div>
+
+    <!-- Output Branches -->
+    <div class="pipeline-branch" id="output-branches">
+        <!-- 4a: HL7 Result -->
+        <div class="branch-connector">
+            <div class="pipeline-stage stage-pending" id="stage-4a">
+                <div class="stage-top-bar"></div>
+                <div class="stage-body">
+                    <div class="stage-number">Stage 4a</div>
+                    <div class="stage-name">HL7 Result</div>
+                    <span class="stage-protocol">HL7v2 ORU^R01</span>
+                    <div class="stage-status">
+                        <span class="status-icon"></span>
+                        <span class="status-text">Pending</span>
+                    </div>
+                    <div class="stage-summary" id="stage-4a-summary"></div>
+                </div>
+            </div>
+        </div>
+        <!-- 4b: DICOM SR -->
+        <div class="branch-connector">
+            <div class="pipeline-stage stage-pending" id="stage-4b">
+                <div class="stage-top-bar"></div>
+                <div class="stage-body">
+                    <div class="stage-number">Stage 4b</div>
+                    <div class="stage-name">DICOM SR</div>
+                    <span class="stage-protocol">DICOM Structured Report</span>
+                    <div class="stage-status">
+                        <span class="status-icon"></span>
+                        <span class="status-text">Pending</span>
+                    </div>
+                    <div class="stage-summary" id="stage-4b-summary"></div>
+                </div>
+            </div>
+        </div>
+        <!-- 4c: FHIR Bundle -->
+        <div class="branch-connector">
+            <div class="pipeline-stage stage-pending" id="stage-4c">
+                <div class="stage-top-bar"></div>
+                <div class="stage-body">
+                    <div class="stage-number">Stage 4c</div>
+                    <div class="stage-name">FHIR Bundle</div>
+                    <span class="stage-protocol">FHIR R4 Resources</span>
+                    <div class="stage-status">
+                        <span class="status-icon"></span>
+                        <span class="status-text">Pending</span>
+                    </div>
+                    <div class="stage-summary" id="stage-4c-summary"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Results -->
+<div id="trace-details"></div>
+
+<!-- Summary -->
+<div id="flow-summary" class="flow-summary"></div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/flow_tracer.js"></script>
+{% endblock %}

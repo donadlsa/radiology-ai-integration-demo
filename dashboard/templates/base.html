@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard{% endblock %} — Integration Ops</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <div class="brand">harrison.ai</div>
+            <div class="subtitle">Integration Ops</div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="/overview"
+               class="{{ 'active' if request.path == '/overview' or request.path == '/' else '' }}">
+                Overview
+            </a>
+            <a href="/diagnostics"
+               class="{{ 'active' if request.path == '/diagnostics' else '' }}">
+                Diagnostics
+            </a>
+            <a href="/slo"
+               class="{{ 'active' if request.path == '/slo' else '' }}">
+                SLO Dashboard
+            </a>
+            <a href="/registry"
+               class="{{ 'active' if request.path == '/registry' else '' }}">
+                Config Registry
+            </a>
+
+            <div class="nav-divider"></div>
+            <div class="nav-section-label">Troubleshooting</div>
+
+            <a href="/runbooks"
+               class="{{ 'active' if request.path == '/runbooks' else '' }}">
+                Runbooks
+            </a>
+            <a href="/flow-tracer"
+               class="{{ 'active' if request.path == '/flow-tracer' else '' }}">
+                Flow Tracer
+            </a>
+            <a href="/patterns"
+               class="{{ 'active' if request.path == '/patterns' else '' }}">
+                Patterns
+            </a>
+
+            <div class="nav-divider"></div>
+            <div class="nav-section-label">Operations</div>
+
+            <a href="/incidents"
+               class="{{ 'active' if request.path == '/incidents' else '' }}">
+                Major Incidents
+            </a>
+            <a href="/coverage"
+               class="{{ 'active' if request.path == '/coverage' else '' }}">
+                Coverage
+            </a>
+            <a href="/self-service"
+               class="{{ 'active' if request.path == '/self-service' else '' }}">
+                Self-Service
+            </a>
+            <a href="/executive"
+               class="{{ 'active' if request.path == '/executive' else '' }}">
+                CEO Report
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            Built by Adam Donaldson
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <div class="page-header">
+            <h1>{% block page_title %}{% endblock %}</h1>
+            <span class="timestamp">{{ now.strftime('%Y-%m-%d %H:%M:%S UTC') if now else '' }}</span>
+        </div>
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+
+</body>
+</html>

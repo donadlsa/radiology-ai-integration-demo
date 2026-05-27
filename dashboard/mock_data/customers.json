@@ -1,0 +1,362 @@
+[
+  {
+    "id": "royal-melbourne",
+    "name": "Royal Melbourne Hospital",
+    "region": "APAC",
+    "customer_type": "SaaS",
+    "go_live_date": "2025-03-15",
+    "status": "active",
+    "pacs_vendor": "Sectra",
+    "ehr_vendor": "Epic",
+    "integration": {
+      "hl7": {
+        "status": "healthy",
+        "endpoint": "mllp://10.1.50.12:2575",
+        "sending_facility": "RMH",
+        "receiving_facility": "HAI_ENGINE",
+        "message_types": ["ORM^O01", "ADT^A08"],
+        "messages_today": 342,
+        "error_rate_pct": 0.3,
+        "last_message": "2026-05-27T08:42:15Z"
+      },
+      "dicom": {
+        "status": "healthy",
+        "ae_title_source": "RMH_PACS",
+        "ae_title_dest": "HAI_AI",
+        "port": 11112,
+        "modalities": ["CR", "CT", "DX"],
+        "studies_today": 187,
+        "error_rate_pct": 0.0,
+        "last_study": "2026-05-27T08:40:02Z"
+      },
+      "fhir": {
+        "status": "degraded",
+        "server_url": "https://fhir.rmh.org.au/R4",
+        "auth_type": "OAuth2",
+        "resources": ["Patient", "ImagingStudy", "DiagnosticReport"],
+        "requests_today": 684,
+        "error_rate_pct": 2.1,
+        "last_request": "2026-05-27T08:41:55Z"
+      }
+    },
+    "contacts": {
+      "primary": "Dr. Sarah Chen, Chief Radiologist",
+      "technical": "James Wu, IT Integration Lead"
+    }
+  },
+  {
+    "id": "nhs-guys-st-thomas",
+    "name": "Guy's & St Thomas' NHS Trust",
+    "region": "EMEA",
+    "customer_type": "SaaS",
+    "go_live_date": "2025-06-01",
+    "status": "active",
+    "pacs_vendor": "GE Centricity",
+    "ehr_vendor": "Cerner",
+    "integration": {
+      "hl7": {
+        "status": "healthy",
+        "endpoint": "mllp://172.16.20.5:2576",
+        "sending_facility": "GSTT",
+        "receiving_facility": "HAI_ENGINE",
+        "message_types": ["ORM^O01", "ORU^R01", "ADT^A08"],
+        "messages_today": 521,
+        "error_rate_pct": 0.1,
+        "last_message": "2026-05-27T09:15:30Z"
+      },
+      "dicom": {
+        "status": "healthy",
+        "ae_title_source": "GSTT_PACS",
+        "ae_title_dest": "HAI_AI",
+        "port": 11112,
+        "modalities": ["CR", "CT", "MR", "DX"],
+        "studies_today": 298,
+        "error_rate_pct": 0.2,
+        "last_study": "2026-05-27T09:14:45Z"
+      },
+      "fhir": {
+        "status": "healthy",
+        "server_url": "https://fhir.gstt.nhs.uk/R4",
+        "auth_type": "SMART on FHIR",
+        "resources": ["Patient", "ImagingStudy", "DiagnosticReport", "Observation"],
+        "requests_today": 1042,
+        "error_rate_pct": 0.4,
+        "last_request": "2026-05-27T09:15:28Z"
+      }
+    },
+    "contacts": {
+      "primary": "Dr. Amir Patel, Head of Radiology",
+      "technical": "Rebecca Torres, Integration Architect"
+    }
+  },
+  {
+    "id": "mayo-clinic-rochester",
+    "name": "Mayo Clinic Rochester",
+    "region": "Americas",
+    "customer_type": "Teleradiology",
+    "go_live_date": "2025-09-01",
+    "status": "active",
+    "pacs_vendor": "Philips PACS",
+    "ehr_vendor": "Epic",
+    "integration": {
+      "hl7": {
+        "status": "healthy",
+        "endpoint": "mllp://10.200.1.45:2575",
+        "sending_facility": "MCR",
+        "receiving_facility": "HAI_ENGINE",
+        "message_types": ["ORM^O01", "ADT^A01", "ADT^A08"],
+        "messages_today": 892,
+        "error_rate_pct": 0.0,
+        "last_message": "2026-05-27T03:22:10Z"
+      },
+      "dicom": {
+        "status": "healthy",
+        "ae_title_source": "MCR_INTELLISPACE",
+        "ae_title_dest": "HAI_AI",
+        "port": 4006,
+        "modalities": ["CR", "CT", "MR", "MG", "DX"],
+        "studies_today": 445,
+        "error_rate_pct": 0.1,
+        "last_study": "2026-05-27T03:21:58Z"
+      },
+      "fhir": {
+        "status": "healthy",
+        "server_url": "https://fhir.mayo.edu/R4",
+        "auth_type": "OAuth2",
+        "resources": ["Patient", "ImagingStudy", "DiagnosticReport", "ServiceRequest"],
+        "requests_today": 1780,
+        "error_rate_pct": 0.2,
+        "last_request": "2026-05-27T03:22:08Z"
+      }
+    },
+    "contacts": {
+      "primary": "Dr. Lisa Yamamoto, Radiology Director",
+      "technical": "Mark Sullivan, Enterprise Integration"
+    }
+  },
+  {
+    "id": "charite-berlin",
+    "name": "Charite Universitatsmedizin Berlin",
+    "region": "EMEA",
+    "customer_type": "SaaS",
+    "go_live_date": "2025-11-15",
+    "status": "active",
+    "pacs_vendor": "Fujifilm Synapse",
+    "ehr_vendor": "Meditech",
+    "integration": {
+      "hl7": {
+        "status": "critical",
+        "endpoint": "mllp://192.168.5.20:2575",
+        "sending_facility": "CHARITE",
+        "receiving_facility": "HAI_ENGINE",
+        "message_types": ["ORM^O01", "ADT^A08"],
+        "messages_today": 45,
+        "error_rate_pct": 12.8,
+        "last_message": "2026-05-27T07:05:00Z"
+      },
+      "dicom": {
+        "status": "healthy",
+        "ae_title_source": "CHA_SYNAPSE",
+        "ae_title_dest": "HAI_AI",
+        "port": 11112,
+        "modalities": ["CR", "CT"],
+        "studies_today": 134,
+        "error_rate_pct": 0.5,
+        "last_study": "2026-05-27T09:02:15Z"
+      },
+      "fhir": {
+        "status": "healthy",
+        "server_url": "https://fhir.charite.de/R4",
+        "auth_type": "mTLS",
+        "resources": ["Patient", "ImagingStudy", "DiagnosticReport"],
+        "requests_today": 268,
+        "error_rate_pct": 0.8,
+        "last_request": "2026-05-27T09:01:50Z"
+      }
+    },
+    "contacts": {
+      "primary": "Prof. Dr. Klaus Weber, Radiology Chair",
+      "technical": "Hannah Richter, IT Systems"
+    }
+  },
+  {
+    "id": "singapore-general",
+    "name": "Singapore General Hospital",
+    "region": "APAC",
+    "customer_type": "Teleradiology",
+    "go_live_date": "2026-01-10",
+    "status": "active",
+    "pacs_vendor": "Agfa Enterprise",
+    "ehr_vendor": "Allscripts",
+    "integration": {
+      "hl7": {
+        "status": "healthy",
+        "endpoint": "mllp://10.50.1.100:2575",
+        "sending_facility": "SGH",
+        "receiving_facility": "HAI_ENGINE",
+        "message_types": ["ORM^O01", "ADT^A08", "ADT^A04"],
+        "messages_today": 276,
+        "error_rate_pct": 0.4,
+        "last_message": "2026-05-27T10:05:42Z"
+      },
+      "dicom": {
+        "status": "degraded",
+        "ae_title_source": "SGH_AGFA",
+        "ae_title_dest": "HAI_AI",
+        "port": 11112,
+        "modalities": ["CR", "CT", "MR"],
+        "studies_today": 156,
+        "error_rate_pct": 3.2,
+        "last_study": "2026-05-27T09:58:10Z"
+      },
+      "fhir": {
+        "status": "healthy",
+        "server_url": "https://fhir.sgh.com.sg/R4",
+        "auth_type": "OAuth2",
+        "resources": ["Patient", "ImagingStudy", "DiagnosticReport"],
+        "requests_today": 512,
+        "error_rate_pct": 0.6,
+        "last_request": "2026-05-27T10:05:38Z"
+      }
+    },
+    "contacts": {
+      "primary": "Dr. Wei Lin Tan, Chief of Imaging",
+      "technical": "Raj Krishnan, Systems Integration"
+    }
+  },
+  {
+    "id": "cleveland-clinic",
+    "name": "Cleveland Clinic",
+    "region": "Americas",
+    "customer_type": "SaaS",
+    "go_live_date": "2026-03-01",
+    "status": "active",
+    "pacs_vendor": "Carestream",
+    "ehr_vendor": "Epic",
+    "integration": {
+      "hl7": {
+        "status": "healthy",
+        "endpoint": "mllp://10.100.2.30:2575",
+        "sending_facility": "CCF",
+        "receiving_facility": "HAI_ENGINE",
+        "message_types": ["ORM^O01", "ORU^R01", "ADT^A08"],
+        "messages_today": 634,
+        "error_rate_pct": 0.2,
+        "last_message": "2026-05-27T02:45:20Z"
+      },
+      "dicom": {
+        "status": "healthy",
+        "ae_title_source": "CCF_CARESTR",
+        "ae_title_dest": "HAI_AI",
+        "port": 11113,
+        "modalities": ["CR", "CT", "MR", "DX", "MG"],
+        "studies_today": 378,
+        "error_rate_pct": 0.1,
+        "last_study": "2026-05-27T02:44:55Z"
+      },
+      "fhir": {
+        "status": "healthy",
+        "server_url": "https://fhir.ccf.org/R4",
+        "auth_type": "SMART on FHIR",
+        "resources": ["Patient", "ImagingStudy", "DiagnosticReport", "Observation", "ServiceRequest"],
+        "requests_today": 1268,
+        "error_rate_pct": 0.3,
+        "last_request": "2026-05-27T02:45:18Z"
+      }
+    },
+    "contacts": {
+      "primary": "Dr. Michael Brooks, Radiology Informatics",
+      "technical": "Priya Sharma, Integration Manager"
+    }
+  },
+  {
+    "id": "st-vincents-sydney",
+    "name": "St Vincent's Hospital Sydney",
+    "region": "APAC",
+    "customer_type": "Teleradiology",
+    "go_live_date": "2026-04-15",
+    "status": "active",
+    "pacs_vendor": "Siemens teamplay",
+    "ehr_vendor": "Cerner",
+    "integration": {
+      "hl7": {
+        "status": "degraded",
+        "endpoint": "mllp://10.30.4.15:2575",
+        "sending_facility": "SVH",
+        "receiving_facility": "HAI_ENGINE",
+        "message_types": ["ORM^O01", "ADT^A08"],
+        "messages_today": 189,
+        "error_rate_pct": 4.2,
+        "last_message": "2026-05-27T10:12:05Z"
+      },
+      "dicom": {
+        "status": "healthy",
+        "ae_title_source": "SVH_TEAMPLAY",
+        "ae_title_dest": "HAI_AI",
+        "port": 11112,
+        "modalities": ["CR", "CT"],
+        "studies_today": 98,
+        "error_rate_pct": 0.0,
+        "last_study": "2026-05-27T10:10:30Z"
+      },
+      "fhir": {
+        "status": "healthy",
+        "server_url": "https://fhir.svh.org.au/R4",
+        "auth_type": "OAuth2",
+        "resources": ["Patient", "ImagingStudy", "DiagnosticReport"],
+        "requests_today": 378,
+        "error_rate_pct": 0.5,
+        "last_request": "2026-05-27T10:11:58Z"
+      }
+    },
+    "contacts": {
+      "primary": "Dr. Emma Fitzgerald, Radiology Lead",
+      "technical": "David Park, IT Infrastructure"
+    }
+  },
+  {
+    "id": "toronto-western",
+    "name": "Toronto Western Hospital",
+    "region": "Americas",
+    "customer_type": "SaaS",
+    "go_live_date": "2026-06-01",
+    "status": "onboarding",
+    "pacs_vendor": "GE Centricity",
+    "ehr_vendor": "Epic",
+    "integration": {
+      "hl7": {
+        "status": "testing",
+        "endpoint": "mllp://10.75.3.8:2575",
+        "sending_facility": "TWH",
+        "receiving_facility": "HAI_ENGINE",
+        "message_types": ["ORM^O01"],
+        "messages_today": 12,
+        "error_rate_pct": 0.0,
+        "last_message": "2026-05-27T01:30:00Z"
+      },
+      "dicom": {
+        "status": "testing",
+        "ae_title_source": "TWH_PACS",
+        "ae_title_dest": "HAI_AI",
+        "port": 11112,
+        "modalities": ["CR", "CT"],
+        "studies_today": 5,
+        "error_rate_pct": 0.0,
+        "last_study": "2026-05-27T01:28:45Z"
+      },
+      "fhir": {
+        "status": "pending",
+        "server_url": "",
+        "auth_type": "TBD",
+        "resources": [],
+        "requests_today": 0,
+        "error_rate_pct": 0.0,
+        "last_request": ""
+      }
+    },
+    "contacts": {
+      "primary": "Dr. Catherine Osei, Radiology Chief",
+      "technical": "Alex Petrov, Clinical Informatics"
+    }
+  }
+]

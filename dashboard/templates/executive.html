@@ -1,0 +1,665 @@
+{% extends "base.html" %}
+
+{% block title %}Executive Report{% endblock %}
+
+{% block page_title %}Executive Report — May 2026{% endblock %}
+
+{% block content %}
+<style>
+    /* Executive Report Styles */
+    .exec-summary {
+        background: #1e2d3d;
+        border-left: 4px solid var(--accent, #00d4aa);
+        border-radius: 8px;
+        padding: 28px 32px;
+        margin-bottom: 28px;
+        font-size: 1.05rem;
+        line-height: 1.7;
+        color: var(--text-primary, #e8edf3);
+    }
+    .exec-summary h2 {
+        margin: 0 0 14px 0;
+        font-size: 1.15rem;
+        color: var(--accent, #00d4aa);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+    }
+    .exec-summary p {
+        margin: 0;
+        color: var(--text-primary, #e8edf3);
+    }
+
+    .exec-metrics {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 16px;
+        margin-bottom: 28px;
+    }
+    .exec-kpi {
+        background: var(--bg-card, #1b2838);
+        border-radius: 8px;
+        padding: 20px 16px;
+        text-align: center;
+        border: 1px solid var(--border, #2a3a4a);
+    }
+    .exec-kpi .kpi-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+        line-height: 1;
+    }
+    .exec-kpi .kpi-label {
+        font-size: 0.78rem;
+        color: var(--text-secondary, #8899aa);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+    .exec-kpi .kpi-context {
+        font-size: 0.72rem;
+        color: var(--text-secondary, #8899aa);
+        font-style: italic;
+    }
+    .kpi-green { color: var(--accent, #00d4aa); }
+    .kpi-yellow { color: var(--status-yellow, #ffc107); }
+    .kpi-red { color: var(--status-red, #ff4757); }
+
+    .exec-two-col {
+        display: grid;
+        grid-template-columns: 60fr 40fr;
+        gap: 24px;
+        margin-bottom: 28px;
+    }
+
+    .exec-section-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--text-primary, #e8edf3);
+        margin: 0 0 16px 0;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border, #2a3a4a);
+    }
+
+    .exec-card {
+        background: var(--bg-card, #1b2838);
+        border-radius: 8px;
+        padding: 24px;
+        border: 1px solid var(--border, #2a3a4a);
+    }
+
+    /* Customer Table */
+    .exec-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+    }
+    .exec-table th {
+        text-align: left;
+        padding: 8px 10px;
+        color: var(--text-secondary, #8899aa);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.72rem;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid var(--border, #2a3a4a);
+    }
+    .exec-table td {
+        padding: 10px 10px;
+        color: var(--text-primary, #e8edf3);
+        border-bottom: 1px solid rgba(42, 58, 74, 0.4);
+    }
+    .exec-table tr:last-child td {
+        border-bottom: none;
+    }
+    .badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    .badge-saas {
+        background: rgba(0, 212, 170, 0.15);
+        color: #00d4aa;
+    }
+    .badge-telerad {
+        background: rgba(100, 149, 237, 0.15);
+        color: #6495ed;
+    }
+    .uptime-green { color: var(--accent, #00d4aa); }
+    .uptime-yellow { color: var(--status-yellow, #ffc107); }
+    .uptime-red { color: var(--status-red, #ff4757); }
+    .slo-yes { color: var(--accent, #00d4aa); }
+    .slo-no { color: var(--status-red, #ff4757); font-weight: 600; }
+
+    .donut-container {
+        max-width: 220px;
+        margin: 20px auto 0;
+    }
+
+    /* Risk Register */
+    .risk-card {
+        background: rgba(13, 27, 42, 0.5);
+        border-radius: 6px;
+        padding: 16px;
+        margin-bottom: 12px;
+        border-left: 3px solid var(--border, #2a3a4a);
+    }
+    .risk-card:last-child {
+        margin-bottom: 0;
+    }
+    .risk-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+    .risk-title {
+        font-weight: 600;
+        color: var(--text-primary, #e8edf3);
+        font-size: 0.9rem;
+    }
+    .risk-high {
+        border-left-color: var(--status-red, #ff4757);
+    }
+    .risk-high .severity-badge {
+        background: rgba(255, 71, 87, 0.15);
+        color: var(--status-red, #ff4757);
+    }
+    .risk-medium {
+        border-left-color: var(--status-yellow, #ffc107);
+    }
+    .risk-medium .severity-badge {
+        background: rgba(255, 193, 7, 0.15);
+        color: var(--status-yellow, #ffc107);
+    }
+    .risk-low {
+        border-left-color: var(--accent, #00d4aa);
+    }
+    .risk-low .severity-badge {
+        background: rgba(0, 212, 170, 0.15);
+        color: var(--accent, #00d4aa);
+    }
+    .severity-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .risk-desc {
+        font-size: 0.82rem;
+        color: var(--text-secondary, #8899aa);
+        line-height: 1.5;
+        margin-bottom: 8px;
+    }
+    .risk-meta {
+        display: flex;
+        gap: 20px;
+        font-size: 0.75rem;
+        color: var(--text-secondary, #8899aa);
+    }
+    .risk-meta strong {
+        color: var(--text-primary, #e8edf3);
+    }
+
+    /* Investment Section */
+    .investment-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-bottom: 28px;
+    }
+    .investment-card {
+        background: var(--bg-card, #1b2838);
+        border-radius: 8px;
+        padding: 24px;
+        border: 1px solid var(--border, #2a3a4a);
+    }
+    .investment-card h4 {
+        margin: 0 0 4px 0;
+        font-size: 0.95rem;
+        color: var(--text-primary, #e8edf3);
+    }
+    .investment-card .invest-desc {
+        font-size: 0.82rem;
+        color: var(--text-secondary, #8899aa);
+        line-height: 1.55;
+        margin: 12px 0;
+    }
+    .invest-roi {
+        font-size: 0.78rem;
+        color: var(--text-secondary, #8899aa);
+        margin: 0;
+        padding: 12px 0 0 0;
+        border-top: 1px solid var(--border, #2a3a4a);
+    }
+    .invest-roi li {
+        margin-bottom: 4px;
+        list-style: none;
+        padding-left: 0;
+    }
+    .invest-roi li::before {
+        content: none;
+    }
+    .invest-roi .roi-label {
+        color: var(--text-secondary, #8899aa);
+        font-weight: 600;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    .invest-roi .roi-value {
+        color: var(--text-primary, #e8edf3);
+    }
+    .invest-status {
+        margin-top: 12px;
+        font-size: 0.78rem;
+        padding: 6px 10px;
+        background: rgba(0, 212, 170, 0.08);
+        border-radius: 4px;
+        color: var(--text-secondary, #8899aa);
+    }
+    .invest-status strong {
+        color: var(--accent, #00d4aa);
+    }
+    .priority-high {
+        background: rgba(255, 71, 87, 0.15);
+        color: var(--status-red, #ff4757);
+    }
+    .priority-medium {
+        background: rgba(255, 193, 7, 0.15);
+        color: var(--status-yellow, #ffc107);
+    }
+
+    /* Team Summary */
+    .team-summary {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 28px;
+    }
+    .team-stat {
+        background: var(--bg-card, #1b2838);
+        border-radius: 8px;
+        padding: 18px 16px;
+        border: 1px solid var(--border, #2a3a4a);
+    }
+    .team-stat .stat-label {
+        font-size: 0.72rem;
+        color: var(--text-secondary, #8899aa);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+    }
+    .team-stat .stat-value {
+        font-size: 0.9rem;
+        color: var(--text-primary, #e8edf3);
+        font-weight: 500;
+        line-height: 1.4;
+    }
+
+    /* Focus List */
+    .focus-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .focus-list li {
+        position: relative;
+        padding: 10px 0 10px 20px;
+        font-size: 0.88rem;
+        color: var(--text-primary, #e8edf3);
+        line-height: 1.5;
+        border-bottom: 1px solid rgba(42, 58, 74, 0.3);
+    }
+    .focus-list li:last-child {
+        border-bottom: none;
+    }
+    .focus-list li::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 16px;
+        width: 8px;
+        height: 8px;
+        background: var(--accent, #00d4aa);
+        border-radius: 50%;
+    }
+
+    .section-subtitle {
+        font-size: 0.8rem;
+        color: var(--text-secondary, #8899aa);
+        margin: -10px 0 16px 0;
+        font-style: italic;
+    }
+
+    @media (max-width: 1200px) {
+        .exec-metrics { grid-template-columns: repeat(3, 1fr); }
+        .exec-two-col { grid-template-columns: 1fr; }
+        .investment-grid { grid-template-columns: 1fr; }
+        .team-summary { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+        .exec-metrics { grid-template-columns: repeat(2, 1fr); }
+    }
+</style>
+
+<!-- 1. Executive Summary -->
+<div class="exec-summary">
+    <h2>Executive Summary</h2>
+    <p>
+        Service operations supported 7 active customer sites across 3 regions with 99.55% weighted average uptime in May 2026. Two P1 incidents occurred — both resolved within SLA. Three recurring integration patterns have been identified and escalated to Engineering, with projected ticket reduction of 26% once deployed.
+    </p>
+</div>
+
+<!-- 2. Key Metrics -->
+<div class="exec-metrics">
+    <div class="exec-kpi">
+        <div class="kpi-label">Global Uptime</div>
+        <div class="kpi-value kpi-yellow">99.55%</div>
+        <div class="kpi-context">Target: 99.9%</div>
+    </div>
+    <div class="exec-kpi">
+        <div class="kpi-label">Active Sites</div>
+        <div class="kpi-value kpi-green">7</div>
+        <div class="kpi-context">+1 onboarding</div>
+    </div>
+    <div class="exec-kpi">
+        <div class="kpi-label">P1 Incidents</div>
+        <div class="kpi-value kpi-green">1</div>
+        <div class="kpi-context">Resolved</div>
+    </div>
+    <div class="exec-kpi">
+        <div class="kpi-label">Avg Time to Resolve</div>
+        <div class="kpi-value kpi-green">3.2h</div>
+        <div class="kpi-context">Target: 4h</div>
+    </div>
+    <div class="exec-kpi">
+        <div class="kpi-label">First Contact Resolution</div>
+        <div class="kpi-value kpi-yellow">75%</div>
+        <div class="kpi-context">Target: 80%</div>
+    </div>
+    <div class="exec-kpi">
+        <div class="kpi-label">Ticket Deflection</div>
+        <div class="kpi-value kpi-green">26%</div>
+        <div class="kpi-context">Self-service portal</div>
+    </div>
+</div>
+
+<!-- 3. Two-Column: Service Health + Risk Register -->
+<div class="exec-two-col">
+
+    <!-- Left Column: Service Health by Customer -->
+    <div class="exec-card">
+        <h3 class="exec-section-title">Service Health by Customer</h3>
+        <table class="exec-table">
+            <thead>
+                <tr>
+                    <th>Customer</th>
+                    <th>Type</th>
+                    <th>Region</th>
+                    <th>Uptime</th>
+                    <th>SLO Met</th>
+                    <th>Open</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Mayo Clinic</td>
+                    <td><span class="badge badge-saas">SaaS</span></td>
+                    <td>US-East</td>
+                    <td class="uptime-green">99.98%</td>
+                    <td class="slo-yes">Yes</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>Cleveland Clinic</td>
+                    <td><span class="badge badge-saas">SaaS</span></td>
+                    <td>US-East</td>
+                    <td class="uptime-green">99.95%</td>
+                    <td class="slo-yes">Yes</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>Charite Berlin</td>
+                    <td><span class="badge badge-telerad">Telerad</span></td>
+                    <td>EU</td>
+                    <td class="uptime-red">98.70%</td>
+                    <td class="slo-no">No</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td>Royal Melbourne</td>
+                    <td><span class="badge badge-saas">SaaS</span></td>
+                    <td>APAC</td>
+                    <td class="uptime-green">99.92%</td>
+                    <td class="slo-yes">Yes</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>Singapore General</td>
+                    <td><span class="badge badge-telerad">Telerad</span></td>
+                    <td>APAC</td>
+                    <td class="uptime-yellow">99.60%</td>
+                    <td class="slo-no">No</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td>NHS King's College</td>
+                    <td><span class="badge badge-saas">SaaS</span></td>
+                    <td>EU</td>
+                    <td class="uptime-green">99.97%</td>
+                    <td class="slo-yes">Yes</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>Seoul National</td>
+                    <td><span class="badge badge-telerad">Telerad</span></td>
+                    <td>APAC</td>
+                    <td class="uptime-green">99.91%</td>
+                    <td class="slo-yes">Yes</td>
+                    <td>0</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="donut-container">
+            <canvas id="sloDonut"></canvas>
+        </div>
+    </div>
+
+    <!-- Right Column: Risk Register -->
+    <div class="exec-card">
+        <h3 class="exec-section-title">Risk Register</h3>
+
+        <div class="risk-card risk-high">
+            <div class="risk-header">
+                <span class="severity-badge">High</span>
+                <span class="risk-title">Charite Berlin HL7 stability</span>
+            </div>
+            <div class="risk-desc">
+                Second P1 incident in 3 months due to uncoordinated customer PACS maintenance. Facility code alias fix approved for Sprint 2026-06-A but interim risk remains.
+            </div>
+            <div class="risk-meta">
+                <span><strong>Mitigation:</strong> Engineering fix in progress</span>
+                <span><strong>Owner:</strong> Platform Team</span>
+            </div>
+        </div>
+
+        <div class="risk-card risk-medium">
+            <div class="risk-header">
+                <span class="severity-badge">Medium</span>
+                <span class="risk-title">FHIR token refresh failures on weekends</span>
+            </div>
+            <div class="risk-desc">
+                5 incidents across 4 customers in May. Silent failure mode means we detect after customer impact.
+            </div>
+            <div class="risk-meta">
+                <span><strong>Mitigation:</strong> Proactive health check under review</span>
+                <span><strong>Owner:</strong> Platform Team</span>
+            </div>
+        </div>
+
+        <div class="risk-card risk-medium">
+            <div class="risk-header">
+                <span class="severity-badge">Medium</span>
+                <span class="risk-title">Singapore General DICOM throughput</span>
+            </div>
+            <div class="risk-desc">
+                CT series timeouts increasing. May require bandwidth upgrade at customer site.
+            </div>
+            <div class="risk-meta">
+                <span><strong>Mitigation:</strong> Customer engagement initiated</span>
+                <span><strong>Owner:</strong> Integration Team</span>
+            </div>
+        </div>
+
+        <div class="risk-card risk-low">
+            <div class="risk-header">
+                <span class="severity-badge">Low</span>
+                <span class="risk-title">Toronto Western onboarding timeline</span>
+            </div>
+            <div class="risk-desc">
+                Go-live scheduled June 1. FHIR integration not yet configured. On track but tight.
+            </div>
+            <div class="risk-meta">
+                <span><strong>Mitigation:</strong> On schedule</span>
+                <span><strong>Owner:</strong> Integration Team</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 4. Investment Priorities -->
+<h3 class="exec-section-title">Investment Recommendations</h3>
+<p class="section-subtitle">Prioritized by impact on service reliability and team scalability</p>
+
+<div class="investment-grid">
+    <div class="investment-card">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;">
+            <h4>Integration Config Automation</h4>
+            <span class="badge priority-high">High</span>
+        </div>
+        <div class="invest-desc">
+            Three of our top recurring incidents stem from manual integration configuration. Investing in configurable templates (facility code aliases, SR description templates, token refresh automation) would eliminate an estimated 12 tickets/month and prevent 2 P1 incidents/quarter.
+        </div>
+        <ul class="invest-roi">
+            <li><span class="roi-label">Effort:</span> <span class="roi-value">10 sprint points</span></li>
+            <li><span class="roi-label">ROI:</span> <span class="roi-value">15 engineering hours/month saved, 2 fewer P1s/quarter</span></li>
+        </ul>
+        <div class="invest-status"><strong>Status:</strong> 2 of 3 fixes approved for upcoming sprint</div>
+    </div>
+
+    <div class="investment-card">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;">
+            <h4>Proactive Monitoring Expansion</h4>
+            <span class="badge priority-high">High</span>
+        </div>
+        <div class="invest-desc">
+            Current monitoring is reactive — we detect issues after customer impact. Adding synthetic transaction monitoring (test HL7 messages, DICOM studies, FHIR submissions every 15 minutes) would shift detection from reactive to proactive.
+        </div>
+        <ul class="invest-roi">
+            <li><span class="roi-label">Effort:</span> <span class="roi-value">8 sprint points</span></li>
+            <li><span class="roi-label">ROI:</span> <span class="roi-value">40% reduction in time-to-detect, improved customer trust</span></li>
+        </ul>
+        <div class="invest-status"><strong>Status:</strong> Proposal stage — needs Engineering capacity allocation</div>
+    </div>
+
+    <div class="investment-card">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;">
+            <h4>Customer Self-Service Portal Expansion</h4>
+            <span class="badge priority-medium">Medium</span>
+        </div>
+        <div class="invest-desc">
+            Self-service portal launched in March is deflecting 26% of tickets. Expanding to include automated DICOM routing validation and FHIR connection testing could increase deflection to 40%+.
+        </div>
+        <ul class="invest-roi">
+            <li><span class="roi-label">Effort:</span> <span class="roi-value">5 sprint points</span></li>
+            <li><span class="roi-label">ROI:</span> <span class="roi-value">Additional 14% ticket deflection, ~20 fewer tickets/month</span></li>
+        </ul>
+        <div class="invest-status"><strong>Status:</strong> Roadmap Q3 2026</div>
+    </div>
+</div>
+
+<!-- 5. Team & Coverage -->
+<h3 class="exec-section-title">Team &amp; Coverage</h3>
+<div class="team-summary">
+    <div class="team-stat">
+        <div class="stat-label">Team Size</div>
+        <div class="stat-value">9 engineers across 3 regions</div>
+    </div>
+    <div class="team-stat">
+        <div class="stat-label">Coverage</div>
+        <div class="stat-value">24/7 follow-the-sun, no gaps</div>
+    </div>
+    <div class="team-stat">
+        <div class="stat-label">Hiring</div>
+        <div class="stat-value">No open requisitions. Next hire planned Q4 2026 if customer count exceeds 12.</div>
+    </div>
+    <div class="team-stat">
+        <div class="stat-label">Training</div>
+        <div class="stat-value">DICOM SR certification completed for 2 engineers. HL7 FHIR mapping training scheduled June.</div>
+    </div>
+</div>
+
+<!-- 6. Next Month Focus -->
+<div class="exec-card" style="margin-bottom:28px;">
+    <h3 class="exec-section-title">Next Month Focus</h3>
+    <ul class="focus-list">
+        <li>Ship facility code alias mapping (Sprint 2026-06-A) — eliminates top P1 pattern</li>
+        <li>Toronto Western go-live — ensure clean handoff to production support</li>
+        <li>Complete FHIR token health check implementation</li>
+        <li>Begin proactive monitoring pilot with 2 customers (Mayo Clinic, Cleveland Clinic)</li>
+    </ul>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    var ctx = document.getElementById('sloDonut');
+    if (!ctx) return;
+
+    new Chart(ctx.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Meeting SLO', 'Below SLO'],
+            datasets: [{
+                data: [5, 2],
+                backgroundColor: ['#00d4aa', '#ff4757'],
+                borderColor: '#1b2838',
+                borderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            cutout: '65%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: '#8899aa',
+                        padding: 16,
+                        font: { size: 12 }
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'SLO Compliance (7 Sites)',
+                    color: '#8899aa',
+                    font: { size: 13, weight: '500' },
+                    padding: { bottom: 8 }
+                }
+            }
+        }
+    });
+})();
+</script>
+{% endblock %}

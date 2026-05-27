@@ -1,0 +1,708 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Self-Service Portal{% endblock %}
+
+{% block page_title %}Customer Self-Service Portal{% endblock %}
+
+{% block content %}
+<style>
+    .page-intro {
+        color: var(--text-secondary, #8899aa);
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+        font-style: italic;
+        border-left: 3px solid var(--accent, #00d4aa);
+        padding-left: 1rem;
+    }
+
+    .portal-header {
+        background: var(--bg-card, #1b2838);
+        border: 1px solid var(--border, #2a3a4a);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .portal-header h2 {
+        color: var(--text-primary, #e8edf3);
+        font-size: 1.2rem;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .portal-header h2 .customer-name {
+        color: var(--accent, #00d4aa);
+    }
+
+    .portal-header p {
+        color: var(--text-secondary, #8899aa);
+        font-size: 0.9rem;
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    .self-service-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    @media (max-width: 900px) {
+        .self-service-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .self-service-card {
+        background: var(--bg-card, #1b2838);
+        border: 1px solid var(--border, #2a3a4a);
+        border-radius: 8px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .self-service-card h3 {
+        color: var(--text-primary, #e8edf3);
+        font-size: 1.05rem;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .self-service-card .card-desc {
+        color: var(--text-secondary, #8899aa);
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+        line-height: 1.45;
+    }
+
+    .self-service-card .card-body {
+        flex: 1;
+    }
+
+    /* Integration Health Indicators */
+    .health-indicators {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        margin-bottom: 1rem;
+    }
+
+    .health-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 0.75rem;
+        background: rgba(13, 27, 42, 0.5);
+        border-radius: 5px;
+    }
+
+    .health-row .channel-name {
+        color: var(--text-primary, #e8edf3);
+        font-size: 0.88rem;
+        font-weight: 600;
+    }
+
+    .health-status {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.82rem;
+        font-weight: 600;
+    }
+
+    .health-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .health-dot.green { background: var(--accent, #00d4aa); }
+    .health-dot.yellow { background: var(--status-yellow, #ffc107); }
+    .health-dot.red { background: var(--status-red, #ff4757); }
+
+    .health-status.green { color: var(--accent, #00d4aa); }
+    .health-status.yellow { color: var(--status-yellow, #ffc107); }
+    .health-status.red { color: var(--status-red, #ff4757); }
+
+    .health-message {
+        font-size: 0.82rem;
+        padding: 0.6rem 0.75rem;
+        border-radius: 5px;
+        line-height: 1.45;
+    }
+
+    .health-message.warning {
+        background: rgba(255, 193, 7, 0.1);
+        border: 1px solid rgba(255, 193, 7, 0.25);
+        color: var(--status-yellow, #ffc107);
+    }
+
+    /* HL7 Test Area */
+    .hl7-textarea {
+        width: 100%;
+        min-height: 120px;
+        background: rgba(13, 27, 42, 0.7);
+        border: 1px solid var(--border, #2a3a4a);
+        border-radius: 5px;
+        color: var(--text-primary, #e8edf3);
+        font-family: 'Courier New', monospace;
+        font-size: 0.75rem;
+        padding: 0.75rem;
+        resize: vertical;
+        box-sizing: border-box;
+    }
+
+    .hl7-textarea:focus {
+        outline: none;
+        border-color: var(--accent, #00d4aa);
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 0.5rem 1.25rem;
+        border: none;
+        border-radius: 5px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 0.75rem;
+        transition: opacity 0.2s;
+    }
+
+    .btn:hover {
+        opacity: 0.85;
+    }
+
+    .btn-primary {
+        background: var(--accent, #00d4aa);
+        color: var(--bg-deep, #0d1b2a);
+    }
+
+    .btn-secondary {
+        background: rgba(136, 153, 170, 0.2);
+        color: var(--text-primary, #e8edf3);
+        border: 1px solid var(--border, #2a3a4a);
+    }
+
+    .test-result {
+        margin-top: 0.75rem;
+        padding: 0.6rem 0.75rem;
+        border-radius: 5px;
+        font-size: 0.82rem;
+        line-height: 1.45;
+        display: none;
+    }
+
+    .test-result.success {
+        background: rgba(0, 212, 170, 0.1);
+        border: 1px solid rgba(0, 212, 170, 0.25);
+        color: var(--accent, #00d4aa);
+    }
+
+    .test-result.error {
+        background: rgba(255, 71, 87, 0.1);
+        border: 1px solid rgba(255, 71, 87, 0.25);
+        color: var(--status-red, #ff4757);
+    }
+
+    .self-help-note {
+        font-size: 0.78rem;
+        color: var(--text-secondary, #8899aa);
+        margin-top: 0.75rem;
+        padding: 0.5rem 0.75rem;
+        background: rgba(13, 27, 42, 0.5);
+        border-radius: 5px;
+        border-left: 3px solid var(--border, #2a3a4a);
+    }
+
+    /* DICOM Config Checklist */
+    .config-checklist {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .config-checklist li {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.5rem 0.75rem;
+        background: rgba(13, 27, 42, 0.5);
+        border-radius: 5px;
+        margin-bottom: 0.4rem;
+        font-size: 0.85rem;
+        color: var(--text-primary, #e8edf3);
+    }
+
+    .config-checklist li input[type="checkbox"] {
+        accent-color: var(--accent, #00d4aa);
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+    }
+
+    .config-checklist .config-label {
+        color: var(--text-secondary, #8899aa);
+        min-width: 140px;
+    }
+
+    .config-checklist .config-value {
+        font-family: 'Courier New', monospace;
+        color: var(--accent, #00d4aa);
+        font-weight: 600;
+    }
+
+    .checklist-note {
+        font-size: 0.8rem;
+        color: var(--text-secondary, #8899aa);
+        margin-top: 0.75rem;
+    }
+
+    /* Ticket Form */
+    .ticket-form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .ticket-form label {
+        font-size: 0.82rem;
+        color: var(--text-secondary, #8899aa);
+        margin-bottom: -0.4rem;
+    }
+
+    .ticket-form input,
+    .ticket-form textarea,
+    .ticket-form select {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        background: rgba(13, 27, 42, 0.7);
+        border: 1px solid var(--border, #2a3a4a);
+        border-radius: 5px;
+        color: var(--text-primary, #e8edf3);
+        font-size: 0.85rem;
+        box-sizing: border-box;
+    }
+
+    .ticket-form input:focus,
+    .ticket-form textarea:focus,
+    .ticket-form select:focus {
+        outline: none;
+        border-color: var(--accent, #00d4aa);
+    }
+
+    .ticket-form textarea {
+        min-height: 60px;
+        resize: vertical;
+    }
+
+    .ticket-form select {
+        cursor: pointer;
+    }
+
+    .ticket-form .form-row {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .ticket-form .form-row > div {
+        flex: 1;
+    }
+
+    .ticket-confirmation {
+        margin-top: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: rgba(0, 212, 170, 0.1);
+        border: 1px solid rgba(0, 212, 170, 0.25);
+        border-radius: 5px;
+        display: none;
+    }
+
+    .ticket-confirmation .ticket-id {
+        color: var(--accent, #00d4aa);
+        font-weight: 700;
+        font-size: 0.95rem;
+    }
+
+    .ticket-confirmation .ticket-eta {
+        color: var(--text-primary, #e8edf3);
+        font-size: 0.82rem;
+        margin-top: 0.35rem;
+    }
+
+    .ticket-confirmation .ticket-note {
+        color: var(--text-secondary, #8899aa);
+        font-size: 0.78rem;
+        margin-top: 0.5rem;
+        font-style: italic;
+    }
+
+    /* Deflection Metrics (Staff View) */
+    .staff-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 1rem;
+        background: rgba(136, 153, 170, 0.12);
+        border: 1px solid var(--border, #2a3a4a);
+        border-radius: 5px;
+        color: var(--text-secondary, #8899aa);
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-bottom: 1rem;
+        transition: all 0.2s;
+    }
+
+    .staff-toggle:hover {
+        background: rgba(136, 153, 170, 0.2);
+        color: var(--text-primary, #e8edf3);
+    }
+
+    .staff-toggle .toggle-icon {
+        transition: transform 0.2s;
+    }
+
+    .staff-toggle.active .toggle-icon {
+        transform: rotate(90deg);
+    }
+
+    .deflection-metrics {
+        background: var(--bg-card, #1b2838);
+        border: 1px solid var(--border, #2a3a4a);
+        border-radius: 8px;
+        padding: 1.5rem;
+        display: none;
+    }
+
+    .deflection-metrics.visible {
+        display: block;
+    }
+
+    .deflection-metrics h3 {
+        color: var(--text-primary, #e8edf3);
+        font-size: 1rem;
+        margin: 0 0 1rem 0;
+    }
+
+    .deflection-metrics .staff-badge {
+        display: inline-block;
+        background: rgba(255, 71, 87, 0.15);
+        color: var(--status-red, #ff4757);
+        border: 1px solid rgba(255, 71, 87, 0.3);
+        padding: 0.15rem 0.5rem;
+        border-radius: 3px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        vertical-align: middle;
+        margin-left: 0.5rem;
+    }
+
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .metric-card {
+        text-align: center;
+        padding: 1rem;
+        background: rgba(13, 27, 42, 0.5);
+        border-radius: 6px;
+    }
+
+    .metric-card .metric-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--accent, #00d4aa);
+        display: block;
+    }
+
+    .metric-card .metric-label {
+        font-size: 0.78rem;
+        color: var(--text-secondary, #8899aa);
+        margin-top: 0.25rem;
+    }
+
+    .metric-detail {
+        font-size: 0.85rem;
+        color: var(--text-primary, #e8edf3);
+        padding: 0.4rem 0;
+        border-bottom: 1px solid rgba(42, 58, 74, 0.5);
+    }
+
+    .metric-detail:last-child {
+        border-bottom: none;
+    }
+
+    .metric-detail .highlight {
+        color: var(--accent, #00d4aa);
+        font-weight: 600;
+    }
+</style>
+
+<p class="page-intro">
+    Build self-service portals and knowledge bases that drive ticket deflection — scaling support capacity without scaling headcount.
+</p>
+
+<!-- Portal Header (Customer View) -->
+<div class="portal-header">
+    <h2>Welcome, <span class="customer-name">Royal Melbourne Hospital IT Team</span></h2>
+    <p>Run these diagnostic checks before opening a support ticket. Most integration issues can be identified and resolved here.</p>
+</div>
+
+<!-- Self-Service Diagnostic Cards -->
+<div class="self-service-grid">
+
+    <!-- Card 1: Check Integration Health -->
+    <div class="self-service-card">
+        <h3>Check Integration Health</h3>
+        <div class="card-desc">View the current status of your HL7, DICOM, and FHIR connections to Harrison.ai.</div>
+        <div class="card-body">
+            <div class="health-indicators">
+                <div class="health-row">
+                    <span class="channel-name">HL7 v2.5</span>
+                    <span class="health-status green"><span class="health-dot green"></span> Connected</span>
+                </div>
+                <div class="health-row">
+                    <span class="channel-name">DICOM</span>
+                    <span class="health-status green"><span class="health-dot green"></span> Connected</span>
+                </div>
+                <div class="health-row">
+                    <span class="channel-name">FHIR R4</span>
+                    <span class="health-status yellow"><span class="health-dot yellow"></span> 2.1% error rate</span>
+                </div>
+            </div>
+            <div class="health-message warning">
+                Your FHIR connection is experiencing intermittent errors. Our team has been notified. Current ETA for resolution: 2 hours.
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 2: Test HL7 Message -->
+    <div class="self-service-card">
+        <h3>Test HL7 Message</h3>
+        <div class="card-desc">Paste a sample HL7 message from your RIS to verify it will be accepted by our interface.</div>
+        <div class="card-body">
+            <textarea class="hl7-textarea" id="hl7-input">MSH|^~\&amp;|RIS|RMH|HAI_ENGINE|HAI|20260527120000||ORM^O01|MSG00001|P|2.5
+PID|1||PAT12345^^^RMH||DOE^JOHN||19650415|M
+PV1|1|O|RAD^RM1^1
+ORC|NW|ORD001|||||^^^20260527120000
+OBR|1|ORD001||71020^CHEST XRAY^CPT||||||||||||ORD_DOC^SMITH^JANE</textarea>
+            <button class="btn btn-primary" id="btn-test-hl7" onclick="testHL7Message()">Test Message</button>
+            <div class="test-result success" id="hl7-result-success">
+                Message format is valid — this message would be accepted by the Harrison.ai interface engine. Detected: ORM^O01 (Order Message), Patient: DOE^JOHN, Procedure: CHEST XRAY.
+            </div>
+            <div class="test-result error" id="hl7-result-error">
+                <!-- Populated by JS if applicable -->
+            </div>
+            <div class="self-help-note">
+                If your message is rejected, check that MSH-4 (Sending Facility) matches your registered facility code: <strong>'RMH'</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 3: Verify DICOM Routing -->
+    <div class="self-service-card">
+        <h3>Verify DICOM Routing</h3>
+        <div class="card-desc">Confirm your PACS is configured to send studies to the correct AI engine endpoint.</div>
+        <div class="card-body">
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0 0 0.75rem 0;">Expected configuration for your site:</p>
+            <ul class="config-checklist" id="dicom-checklist">
+                <li>
+                    <input type="checkbox" id="check-ae">
+                    <span class="config-label">Your AE Title:</span>
+                    <span class="config-value">RMH_PACS</span>
+                </li>
+                <li>
+                    <input type="checkbox" id="check-dest">
+                    <span class="config-label">Destination AE Title:</span>
+                    <span class="config-value">HAI_AI</span>
+                </li>
+                <li>
+                    <input type="checkbox" id="check-port">
+                    <span class="config-label">Destination Port:</span>
+                    <span class="config-value">11112</span>
+                </li>
+                <li>
+                    <input type="checkbox" id="check-mod">
+                    <span class="config-label">Supported Modalities:</span>
+                    <span class="config-value">CR, CT, DX</span>
+                </li>
+            </ul>
+            <p class="checklist-note">Verify these settings match your PACS Send Destination configuration. Check each box once confirmed.</p>
+        </div>
+    </div>
+
+    <!-- Card 4: Still Need Help? -->
+    <div class="self-service-card">
+        <h3>Still Need Help?</h3>
+        <div class="card-desc">If self-service checks didn't resolve your issue, open a support ticket.</div>
+        <div class="card-body">
+            <div class="ticket-form" id="ticket-form">
+                <label for="ticket-subject">Subject</label>
+                <input type="text" id="ticket-subject" placeholder="Brief description of the issue">
+
+                <label for="ticket-description">Description</label>
+                <textarea id="ticket-description" placeholder="Describe what you observed, when it started, and any error messages"></textarea>
+
+                <div class="form-row">
+                    <div>
+                        <label for="ticket-severity">Severity</label>
+                        <select id="ticket-severity">
+                            <option value="P1">P1 — Critical (service down)</option>
+                            <option value="P2" selected>P2 — High (degraded service)</option>
+                            <option value="P3">P3 — Medium (non-urgent)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="ticket-channel">Channel</label>
+                        <select id="ticket-channel">
+                            <option value="HL7">HL7</option>
+                            <option value="DICOM">DICOM</option>
+                            <option value="FHIR">FHIR</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="submitTicket()">Submit Ticket</button>
+
+                <div class="self-help-note" style="border-left-color: var(--accent);">
+                    Providing diagnostic results from the checks above helps us resolve your issue faster.
+                </div>
+            </div>
+
+            <div class="ticket-confirmation" id="ticket-confirmation">
+                <div class="ticket-id">Ticket INC-2026-0850 created</div>
+                <div class="ticket-eta" id="ticket-eta">Expected response time: 2 hours (P2)</div>
+                <div class="ticket-note">Our team will reach out via your registered contact method. You can track this ticket in the Harrison.ai support portal.</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Staff View Toggle & Deflection Metrics -->
+<button class="staff-toggle" id="staff-toggle" onclick="toggleStaffView()">
+    <span class="toggle-icon">&#9654;</span> Staff View: Ticket Deflection Metrics
+</button>
+
+<div class="deflection-metrics" id="deflection-metrics">
+    <h3>Ticket Deflection Metrics <span class="staff-badge">Internal Only</span></h3>
+
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <span class="metric-value">342</span>
+            <span class="metric-label">Total self-service sessions</span>
+        </div>
+        <div class="metric-card">
+            <span class="metric-value">89</span>
+            <span class="metric-label">Tickets deflected (26%)</span>
+        </div>
+        <div class="metric-card">
+            <span class="metric-value">8 min</span>
+            <span class="metric-label">Avg self-service resolution</span>
+        </div>
+        <div class="metric-card">
+            <span class="metric-value">3.2 hrs</span>
+            <span class="metric-label">Avg ticket resolution</span>
+        </div>
+    </div>
+
+    <div class="metric-detail">
+        Self-service portal launched: <span class="highlight">2026-03-01</span>
+    </div>
+    <div class="metric-detail">
+        Most common self-service resolution: <span class="highlight">HL7 message format validation (41%)</span>
+    </div>
+    <div class="metric-detail">
+        Second most common: <span class="highlight">DICOM routing verification (28%)</span>
+    </div>
+    <div class="metric-detail">
+        Customer adoption rate: <span class="highlight">5 of 7 active customers using portal regularly</span>
+    </div>
+</div>
+
+<script>
+    function testHL7Message() {
+        var input = document.getElementById('hl7-input').value.trim();
+        var successEl = document.getElementById('hl7-result-success');
+        var errorEl = document.getElementById('hl7-result-error');
+
+        // Hide both results first
+        successEl.style.display = 'none';
+        errorEl.style.display = 'none';
+
+        if (!input) {
+            errorEl.textContent = 'Please paste an HL7 message to test.';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        // Simulate API call to /api/diagnostics/parse-hl7
+        var lines = input.split('\n');
+        var mshLine = lines[0] || '';
+
+        // Basic validation checks
+        if (!mshLine.startsWith('MSH|')) {
+            errorEl.textContent = 'Invalid message: First segment must be MSH. Your message starts with "' + mshLine.substring(0, 10) + '".';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        var fields = mshLine.split('|');
+        var sendingFacility = fields[3] || '';
+
+        if (sendingFacility !== 'RMH') {
+            errorEl.innerHTML = 'Rejected: MSH-4 (Sending Facility) is "<strong>' + sendingFacility + '</strong>" but your registered facility code is "<strong>RMH</strong>". Please update MSH-4 and retry.';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        // Check for message type
+        var messageType = fields[8] || '';
+        if (!messageType) {
+            errorEl.textContent = 'Invalid message: MSH-9 (Message Type) is empty. Expected format: ORM^O01, ORU^R01, etc.';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        // All checks passed
+        successEl.style.display = 'block';
+    }
+
+    function submitTicket() {
+        var subject = document.getElementById('ticket-subject').value.trim();
+        var severity = document.getElementById('ticket-severity').value;
+        var form = document.getElementById('ticket-form');
+        var confirmation = document.getElementById('ticket-confirmation');
+        var etaEl = document.getElementById('ticket-eta');
+
+        var etaMap = {
+            'P1': '15 minutes (P1)',
+            'P2': '2 hours (P2)',
+            'P3': '8 hours (P3)'
+        };
+
+        etaEl.textContent = 'Expected response time: ' + etaMap[severity];
+
+        form.style.display = 'none';
+        confirmation.style.display = 'block';
+    }
+
+    function toggleStaffView() {
+        var toggle = document.getElementById('staff-toggle');
+        var metrics = document.getElementById('deflection-metrics');
+
+        toggle.classList.toggle('active');
+
+        if (metrics.classList.contains('visible')) {
+            metrics.classList.remove('visible');
+        } else {
+            metrics.classList.add('visible');
+        }
+    }
+</script>
+{% endblock %}

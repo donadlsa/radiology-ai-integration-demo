@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Integration Configuration Registry{% endblock %}
+
+{% block content %}
+<div class="filter-row">
+  <label for="filter-status">Status:</label>
+  <select id="filter-status">
+    <option value="">All</option>
+    <option value="active">Active</option>
+    <option value="onboarding">Onboarding</option>
+    <option value="inactive">Inactive</option>
+  </select>
+  <label for="filter-region">Region:</label>
+  <select id="filter-region">
+    <option value="">All</option>
+  </select>
+</div>
+<div id="registry-table"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+  let customers = [];
+
+  async function fetchCustomers() {
+    const resp = await fetch('/api/customers');
+    customers = await resp.json();
+    populateRegionFilter();
+    renderTable();
+  }
+
+  function populateRegionFilter() {
+    const regionSelect = document.getElementById('filter-region');
+    const regions = [...new Set(customers.map(c => c.region).filter(Boolean))].sort();
+    regions.forEach(r => {
+      const opt = document.createElement('option');
+      opt.value = r;
+      opt.textContent = r;
+      regionSelect.appendChild(opt);
+    });
+  }
+
+  function renderTable() {
+    const status = document.getElementById('filter-status').value;
+    const region = document.getElementById('filter-region').value;
+
+    let filtered = customers;
+    if (status) filtered = filtered.filter(c => c.status === status);
+    if (region) filtered = filtered.filter(c => c.region === region);
+
+    const container = document.getElementById('registry-table');
+    if (!filtered.length) {
+      container.innerHTML = '<p>No integrations found.</p>';
+      return;
+    }
+
+    let html = '<table class="registry"><thead><tr>';
+    html += '<th>Customer</th><th>Status</th><th>Region</th>';
+    html += '<th>HL7</th><th>DICOM</th><th>FHIR</th>';
+    html += '</tr></thead><tbody>';
+    filtered.forEach(c => {
+      html += '<tr>';
+      html += `<td><a href="/customer/${c.id}">${c.name || c.id}</a></td>`;
+      html += `<td>${c.status || ''}</td>`;
+      html += `<td>${c.region || ''}</td>`;
+      html += `<td>${c.hl7 ? 'Yes' : 'No'}</td>`;
+      html += `<td>${c.dicom ? 'Yes' : 'No'}</td>`;
+      html += `<td>${c.fhir ? 'Yes' : 'No'}</td>`;
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  document.getElementById('filter-status').addEventListener('change', renderTable);
+  document.getElementById('filter-region').addEventListener('change', renderTable);
+
+  fetchCustomers();
+})();
+</script>
+{% endblock %}

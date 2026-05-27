@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Detail{% endblock %}
+
+{% block content %}
+<div id="customer-detail" data-customer-id="{{ customer_id }}"></div>
+
+<div id="customer-header"></div>
+
+<div class="detail-grid">
+  <div id="hl7-panel" class="integration-panel"></div>
+  <div id="dicom-panel" class="integration-panel"></div>
+  <div id="fhir-panel" class="integration-panel"></div>
+</div>
+
+<div class="two-column-layout">
+  <div id="incidents-section"></div>
+  <div id="slo-section"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/customer.js"></script>
+{% endblock %}

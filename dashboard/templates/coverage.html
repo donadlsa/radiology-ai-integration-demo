@@ -1,0 +1,790 @@
+{% extends "base.html" %}
+
+{% block title %}Follow-the-Sun Coverage{% endblock %}
+
+{% block page_title %}Follow-the-Sun Coverage{% endblock %}
+
+{% block content %}
+<style>
+    /* ── Coverage-specific styles ── */
+    .coverage-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        margin-bottom: 40px;
+    }
+
+    .region-card {
+        background: var(--bg-card, #1b2838);
+        border: 1px solid var(--border, #2a3a4a);
+        border-radius: 12px;
+        padding: 24px;
+        transition: all 0.4s ease;
+    }
+
+    .region-card.off-shift {
+        opacity: 0.45;
+    }
+
+    .region-card.active {
+        border-color: var(--accent, #00d4aa);
+        box-shadow: 0 0 20px rgba(0, 212, 170, 0.25), 0 0 40px rgba(0, 212, 170, 0.08);
+    }
+
+    .region-card.active .region-header {
+        color: var(--accent, #00d4aa);
+    }
+
+    .region-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+    }
+
+    .region-name {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text-primary, #e8edf3);
+    }
+
+    .region-city {
+        font-size: 0.85rem;
+        color: var(--text-secondary, #8899aa);
+        margin-top: 2px;
+    }
+
+    .shift-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .shift-badge.on-shift {
+        background: rgba(0, 212, 170, 0.15);
+        color: #00d4aa;
+    }
+
+    .shift-badge.off {
+        background: rgba(136, 153, 170, 0.15);
+        color: #8899aa;
+    }
+
+    .region-detail {
+        font-size: 0.85rem;
+        color: var(--text-secondary, #8899aa);
+        margin-bottom: 4px;
+    }
+
+    .region-detail span {
+        color: var(--text-primary, #e8edf3);
+        font-weight: 500;
+    }
+
+    .local-time {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary, #e8edf3);
+        margin: 12px 0;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .team-list {
+        margin-top: 16px;
+        border-top: 1px solid var(--border, #2a3a4a);
+        padding-top: 12px;
+    }
+
+    .team-list h4 {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-secondary, #8899aa);
+        margin-bottom: 10px;
+    }
+
+    .team-member {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+        color: var(--text-primary, #e8edf3);
+    }
+
+    .role-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .role-badge.lead {
+        background: rgba(0, 212, 170, 0.2);
+        color: #00d4aa;
+    }
+
+    .role-badge.senior {
+        background: rgba(99, 179, 237, 0.2);
+        color: #63b3ed;
+    }
+
+    .role-badge.engineer {
+        background: rgba(136, 153, 170, 0.15);
+        color: #8899aa;
+    }
+
+    .customer-assignments {
+        margin-top: 12px;
+        border-top: 1px solid var(--border, #2a3a4a);
+        padding-top: 12px;
+    }
+
+    .customer-assignments h4 {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-secondary, #8899aa);
+        margin-bottom: 8px;
+    }
+
+    .customer-tag {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        background: rgba(42, 58, 74, 0.8);
+        color: var(--text-secondary, #8899aa);
+        margin: 2px 4px 2px 0;
+    }
+
+    .ticket-count {
+        margin-top: 14px;
+        padding-top: 12px;
+        border-top: 1px solid var(--border, #2a3a4a);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .ticket-count .count {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--text-primary, #e8edf3);
+    }
+
+    .ticket-count .label {
+        font-size: 0.8rem;
+        color: var(--text-secondary, #8899aa);
+    }
+
+    /* ── Timeline ── */
+    .timeline-section {
+        margin-bottom: 40px;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-primary, #e8edf3);
+        margin-bottom: 16px;
+    }
+
+    .timeline-wrapper {
+        position: relative;
+        margin-bottom: 8px;
+    }
+
+    .timeline-bar {
+        display: flex;
+        height: 48px;
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+        background: var(--bg-card, #1b2838);
+        border: 1px solid var(--border, #2a3a4a);
+    }
+
+    .timeline-segment {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #fff;
+        position: relative;
+    }
+
+    .timeline-segment.apac {
+        width: 33.33%;
+        background: rgba(66, 133, 244, 0.5);
+        border-right: 2px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .timeline-segment.emea {
+        width: 33.33%;
+        background: rgba(0, 212, 170, 0.4);
+        border-right: 2px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .timeline-segment.americas {
+        width: 33.33%;
+        background: rgba(255, 167, 38, 0.4);
+    }
+
+    .timeline-overlap {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        width: 2.08%;
+        background: repeating-linear-gradient(
+            45deg,
+            rgba(255, 255, 255, 0.08),
+            rgba(255, 255, 255, 0.08) 2px,
+            transparent 2px,
+            transparent 6px
+        );
+        border-left: 1px dashed rgba(255, 255, 255, 0.3);
+        border-right: 1px dashed rgba(255, 255, 255, 0.3);
+        z-index: 2;
+    }
+
+    .timeline-overlap.handoff-1 {
+        left: 24.65%;
+    }
+
+    .timeline-overlap.handoff-2 {
+        left: 57.99%;
+    }
+
+    .timeline-overlap.handoff-3 {
+        left: 91.32%;
+    }
+
+    .timeline-now {
+        position: absolute;
+        top: -8px;
+        bottom: -24px;
+        width: 2px;
+        background: #ff4757;
+        z-index: 10;
+        transition: left 0.5s ease;
+    }
+
+    .timeline-now::before {
+        content: 'NOW';
+        position: absolute;
+        top: -18px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: #ff4757;
+        letter-spacing: 1px;
+    }
+
+    .timeline-now::after {
+        content: '';
+        position: absolute;
+        top: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #ff4757;
+    }
+
+    .timeline-hours {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.7rem;
+        color: var(--text-secondary, #8899aa);
+        padding: 4px 0;
+    }
+
+    .timeline-legend {
+        display: flex;
+        gap: 24px;
+        margin-top: 12px;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.8rem;
+        color: var(--text-secondary, #8899aa);
+    }
+
+    .legend-color {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+    }
+
+    .legend-color.apac { background: rgba(66, 133, 244, 0.6); }
+    .legend-color.emea { background: rgba(0, 212, 170, 0.5); }
+    .legend-color.americas { background: rgba(255, 167, 38, 0.5); }
+    .legend-color.overlap {
+        background: repeating-linear-gradient(
+            45deg,
+            rgba(255, 255, 255, 0.15),
+            rgba(255, 255, 255, 0.15) 2px,
+            transparent 2px,
+            transparent 5px
+        );
+        border: 1px dashed rgba(255, 255, 255, 0.3);
+    }
+
+    /* ── Handoff Table ── */
+    .handoff-section {
+        margin-bottom: 40px;
+    }
+
+    .handoff-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+    }
+
+    .handoff-table thead th {
+        text-align: left;
+        padding: 12px 16px;
+        background: rgba(13, 27, 42, 0.6);
+        color: var(--text-secondary, #8899aa);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid var(--border, #2a3a4a);
+    }
+
+    .handoff-table tbody td {
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--border, #2a3a4a);
+        color: var(--text-primary, #e8edf3);
+        vertical-align: top;
+    }
+
+    .handoff-table tbody tr:hover {
+        background: rgba(0, 212, 170, 0.03);
+    }
+
+    .handoff-time {
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+        color: var(--text-secondary, #8899aa);
+        font-size: 0.8rem;
+    }
+
+    .handoff-route {
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .handoff-route .arrow {
+        color: var(--accent, #00d4aa);
+        margin: 0 4px;
+    }
+
+    .handoff-notes {
+        font-size: 0.82rem;
+        color: var(--text-secondary, #8899aa);
+        line-height: 1.5;
+        max-width: 520px;
+    }
+
+    /* ── Capacity ── */
+    .capacity-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 16px;
+        margin-bottom: 40px;
+    }
+
+    .capacity-card {
+        background: var(--bg-card, #1b2838);
+        border: 1px solid var(--border, #2a3a4a);
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .capacity-card .value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--text-primary, #e8edf3);
+    }
+
+    .capacity-card .value.green {
+        color: var(--accent, #00d4aa);
+    }
+
+    .capacity-card .label {
+        font-size: 0.75rem;
+        color: var(--text-secondary, #8899aa);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 6px;
+    }
+
+    .capacity-card .detail {
+        font-size: 0.78rem;
+        color: var(--text-secondary, #8899aa);
+        margin-top: 8px;
+        line-height: 1.4;
+    }
+
+    .live-clock {
+        font-size: 0.9rem;
+        color: var(--text-secondary, #8899aa);
+        margin-bottom: 24px;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .live-clock span {
+        color: var(--text-primary, #e8edf3);
+        font-weight: 600;
+    }
+
+    @media (max-width: 1100px) {
+        .coverage-grid {
+            grid-template-columns: 1fr;
+        }
+        .capacity-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 700px) {
+        .capacity-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+
+<!-- Live Clock -->
+<div class="live-clock">
+    Current UTC: <span id="utc-clock">--:--:--</span>
+</div>
+
+<!-- ============================================ -->
+<!-- 1. Current Coverage Status                   -->
+<!-- ============================================ -->
+<h2 class="section-title">Current Coverage Status</h2>
+
+<div class="coverage-grid">
+    <!-- APAC -->
+    <div class="region-card" id="region-apac" data-shift-start="6" data-shift-end="14" data-utc-offset="11">
+        <div class="region-header">
+            <div>
+                <div class="region-name">APAC</div>
+                <div class="region-city">Sydney, Australia &middot; UTC+11</div>
+            </div>
+            <span class="shift-badge off" id="badge-apac">Off-Shift</span>
+        </div>
+        <div class="region-detail">Shift: <span>06:00 &ndash; 14:00 UTC</span></div>
+        <div class="local-time" id="time-apac">--:--</div>
+
+        <div class="team-list">
+            <h4>Team</h4>
+            <div class="team-member">Sarah Kim <span class="role-badge lead">Lead</span></div>
+            <div class="team-member">Raj Krishnan <span class="role-badge senior">Senior</span></div>
+            <div class="team-member">Wei Chen <span class="role-badge engineer">Engineer</span></div>
+        </div>
+
+        <div class="customer-assignments">
+            <h4>Primary Customers</h4>
+            <span class="customer-tag">SGH Singapore</span>
+            <span class="customer-tag">Royal Melbourne Hospital</span>
+            <span class="customer-tag">Apollo Hospitals India</span>
+        </div>
+
+        <div class="ticket-count">
+            <div class="count">3</div>
+            <div class="label">active tickets</div>
+        </div>
+    </div>
+
+    <!-- EMEA -->
+    <div class="region-card" id="region-emea" data-shift-start="14" data-shift-end="22" data-utc-offset="0">
+        <div class="region-header">
+            <div>
+                <div class="region-name">EMEA</div>
+                <div class="region-city">London, UK &middot; UTC+0</div>
+            </div>
+            <span class="shift-badge off" id="badge-emea">Off-Shift</span>
+        </div>
+        <div class="region-detail">Shift: <span>14:00 &ndash; 22:00 UTC</span></div>
+        <div class="local-time" id="time-emea">--:--</div>
+
+        <div class="team-list">
+            <h4>Team</h4>
+            <div class="team-member">Hannah Richter <span class="role-badge lead">Lead</span></div>
+            <div class="team-member">Amir Patel <span class="role-badge senior">Senior</span></div>
+            <div class="team-member">Rebecca Torres <span class="role-badge engineer">Engineer</span></div>
+        </div>
+
+        <div class="customer-assignments">
+            <h4>Primary Customers</h4>
+            <span class="customer-tag">Charit&eacute; Berlin</span>
+            <span class="customer-tag">NHS Trusts UK</span>
+            <span class="customer-tag">Karolinska Sweden</span>
+        </div>
+
+        <div class="ticket-count">
+            <div class="count">4</div>
+            <div class="label">active tickets</div>
+        </div>
+    </div>
+
+    <!-- Americas -->
+    <div class="region-card" id="region-americas" data-shift-start="22" data-shift-end="6" data-utc-offset="-6">
+        <div class="region-header">
+            <div>
+                <div class="region-name">Americas</div>
+                <div class="region-city">Austin, TX &middot; UTC-6</div>
+            </div>
+            <span class="shift-badge off" id="badge-americas">Off-Shift</span>
+        </div>
+        <div class="region-detail">Shift: <span>22:00 &ndash; 06:00 UTC</span></div>
+        <div class="local-time" id="time-americas">--:--</div>
+
+        <div class="team-list">
+            <h4>Team</h4>
+            <div class="team-member">Mark Sullivan <span class="role-badge lead">Lead</span></div>
+            <div class="team-member">Priya Sharma <span class="role-badge senior">Senior</span></div>
+            <div class="team-member">Carlos Mendez <span class="role-badge engineer">Engineer</span></div>
+        </div>
+
+        <div class="customer-assignments">
+            <h4>Primary Customers</h4>
+            <span class="customer-tag">Cleveland Clinic</span>
+            <span class="customer-tag">Toronto Western</span>
+            <span class="customer-tag">Mayo Clinic</span>
+        </div>
+
+        <div class="ticket-count">
+            <div class="count">2</div>
+            <div class="label">active tickets</div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- 2. 24-Hour Coverage Timeline                 -->
+<!-- ============================================ -->
+<div class="timeline-section">
+    <h2 class="section-title">24-Hour Coverage Timeline</h2>
+
+    <div class="timeline-wrapper">
+        <div class="timeline-bar">
+            <!-- Americas tail: 00:00-06:00 = 25% -->
+            <div class="timeline-segment americas" style="width:25%;">Americas</div>
+            <!-- APAC: 06:00-14:00 = 33.33% -->
+            <div class="timeline-segment apac" style="width:33.33%;">APAC</div>
+            <!-- EMEA: 14:00-22:00 = 33.33% -->
+            <div class="timeline-segment emea" style="width:33.33%;">EMEA</div>
+            <!-- Americas start: 22:00-00:00 = 8.33% -->
+            <div class="timeline-segment americas" style="width:8.34%;">Amer.</div>
+
+            <!-- Handoff overlaps (30-min windows) -->
+            <div class="timeline-overlap handoff-1" title="Americas/APAC handoff: 05:30-06:30 UTC"></div>
+            <div class="timeline-overlap handoff-2" title="APAC/EMEA handoff: 13:30-14:30 UTC"></div>
+            <div class="timeline-overlap handoff-3" title="EMEA/Americas handoff: 21:30-22:30 UTC"></div>
+
+            <!-- Now marker -->
+            <div class="timeline-now" id="timeline-now" style="left:0%;"></div>
+        </div>
+
+        <div class="timeline-hours">
+            <span>00:00</span>
+            <span>03:00</span>
+            <span>06:00</span>
+            <span>09:00</span>
+            <span>12:00</span>
+            <span>15:00</span>
+            <span>18:00</span>
+            <span>21:00</span>
+            <span>24:00</span>
+        </div>
+    </div>
+
+    <div class="timeline-legend">
+        <div class="legend-item"><div class="legend-color apac"></div> APAC (06-14 UTC)</div>
+        <div class="legend-item"><div class="legend-color emea"></div> EMEA (14-22 UTC)</div>
+        <div class="legend-item"><div class="legend-color americas"></div> Americas (22-06 UTC)</div>
+        <div class="legend-item"><div class="legend-color overlap"></div> Handoff Window (30 min)</div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- 3. Shift Handoff Log                         -->
+<!-- ============================================ -->
+<div class="handoff-section">
+    <h2 class="section-title">Shift Handoff Log</h2>
+
+    <table class="handoff-table">
+        <thead>
+            <tr>
+                <th>Time (UTC)</th>
+                <th>Handoff</th>
+                <th>Open Tickets</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="handoff-time">2026-05-27 14:00</td>
+                <td class="handoff-route">APAC <span class="arrow">&rarr;</span> EMEA</td>
+                <td>3</td>
+                <td class="handoff-notes">P1 Charit&eacute; Berlin still active &mdash; Hannah Richter taking lead. RMH FHIR issue stable, monitoring. SGH DICOM timeout under investigation.</td>
+            </tr>
+            <tr>
+                <td class="handoff-time">2026-05-27 06:00</td>
+                <td class="handoff-route">Americas <span class="arrow">&rarr;</span> APAC</td>
+                <td>2</td>
+                <td class="handoff-notes">Cleveland Clinic duplicate order fix deployed overnight. Toronto Western onboarding test messages flowing cleanly.</td>
+            </tr>
+            <tr>
+                <td class="handoff-time">2026-05-26 22:00</td>
+                <td class="handoff-route">EMEA <span class="arrow">&rarr;</span> Americas</td>
+                <td>4</td>
+                <td class="handoff-notes">Charit&eacute; P1 detected at 18:50. Root cause identified (MSH-4 facility code). Temp fix applied. Mark to monitor overnight stability.</td>
+            </tr>
+            <tr>
+                <td class="handoff-time">2026-05-26 14:00</td>
+                <td class="handoff-route">APAC <span class="arrow">&rarr;</span> EMEA</td>
+                <td>1</td>
+                <td class="handoff-notes">Quiet shift. SGH DICOM latency creeping up, flagged for investigation. All other sites green.</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ============================================ -->
+<!-- 4. Team Capacity                             -->
+<!-- ============================================ -->
+<div class="capacity-section">
+    <h2 class="section-title">Team Capacity</h2>
+
+    <div class="capacity-grid">
+        <div class="capacity-card">
+            <div class="value">9</div>
+            <div class="label">Total Engineers</div>
+            <div class="detail">3 regions &times; 3 per shift</div>
+        </div>
+        <div class="capacity-card">
+            <div class="value green" id="on-shift-count">3</div>
+            <div class="label">Currently On-Shift</div>
+            <div class="detail" id="on-shift-region">--</div>
+        </div>
+        <div class="capacity-card">
+            <div class="value">2.1</div>
+            <div class="label">Avg Tickets / Engineer / Shift</div>
+            <div class="detail">Trailing 30-day average</div>
+        </div>
+        <div class="capacity-card">
+            <div class="value green">None</div>
+            <div class="label">Coverage Gaps</div>
+            <div class="detail">All shifts fully staffed</div>
+        </div>
+        <div class="capacity-card">
+            <div class="value" style="font-size:1rem; line-height:1.4;">Raj Krishnan</div>
+            <div class="label">Next Scheduled PTO</div>
+            <div class="detail">June 2&ndash;6 &mdash; covered by Wei Chen</div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    // Region definitions
+    var regions = [
+        { id: 'apac',     start: 6,  end: 14, offset: 11, label: 'APAC' },
+        { id: 'emea',     start: 14, end: 22, offset: 0,  label: 'EMEA' },
+        { id: 'americas', start: 22, end: 6,  offset: -6, label: 'Americas' }
+    ];
+
+    function pad(n) {
+        return n < 10 ? '0' + n : '' + n;
+    }
+
+    function isActive(region, utcHour, utcMinute) {
+        var t = utcHour + utcMinute / 60;
+        if (region.start < region.end) {
+            return t >= region.start && t < region.end;
+        }
+        // Wraps midnight (Americas: 22-6)
+        return t >= region.start || t < region.end;
+    }
+
+    function formatLocalTime(utcHour, utcMinute, utcSecond, offset) {
+        var localH = ((utcHour + offset) % 24 + 24) % 24;
+        return pad(localH) + ':' + pad(utcMinute) + ':' + pad(utcSecond);
+    }
+
+    function update() {
+        var now = new Date();
+        var utcH = now.getUTCHours();
+        var utcM = now.getUTCMinutes();
+        var utcS = now.getUTCSeconds();
+
+        // Update live clock
+        var clockEl = document.getElementById('utc-clock');
+        if (clockEl) clockEl.textContent = pad(utcH) + ':' + pad(utcM) + ':' + pad(utcS) + ' UTC';
+
+        var activeRegionLabel = '--';
+
+        regions.forEach(function(r) {
+            var card = document.getElementById('region-' + r.id);
+            var badge = document.getElementById('badge-' + r.id);
+            var timeEl = document.getElementById('time-' + r.id);
+            if (!card) return;
+
+            var active = isActive(r, utcH, utcM);
+
+            card.classList.toggle('active', active);
+            card.classList.toggle('off-shift', !active);
+
+            if (badge) {
+                badge.textContent = active ? 'On-Shift' : 'Off-Shift';
+                badge.classList.toggle('on-shift', active);
+                badge.classList.toggle('off', !active);
+            }
+
+            if (timeEl) {
+                timeEl.textContent = formatLocalTime(utcH, utcM, utcS, r.offset);
+            }
+
+            if (active) {
+                activeRegionLabel = r.label;
+            }
+        });
+
+        // Update capacity on-shift region
+        var onShiftRegion = document.getElementById('on-shift-region');
+        if (onShiftRegion) onShiftRegion.textContent = activeRegionLabel + ' region';
+
+        // Position "now" marker on timeline
+        var fraction = (utcH + utcM / 60) / 24;
+        var marker = document.getElementById('timeline-now');
+        if (marker) marker.style.left = (fraction * 100).toFixed(2) + '%';
+    }
+
+    // Run immediately and every second
+    update();
+    setInterval(update, 1000);
+})();
+</script>
+{% endblock %}

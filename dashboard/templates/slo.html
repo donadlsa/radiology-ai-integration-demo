@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}SLO Dashboard{% endblock %}
+
+{% block content %}
+<div id="kpi-row" class="kpi-row"></div>
+<div id="slo-table-container"></div>
+<div style="max-width:800px;margin:30px auto;">
+  <canvas id="incident-chart"></canvas>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/slo.js"></script>
+{% endblock %}
