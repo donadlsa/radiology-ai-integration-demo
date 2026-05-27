@@ -1,0 +1,49 @@
+{
+  "resourceType": "DiagnosticReport",
+  "id": "ai-report-001",
+  "basedOn": [
+    {
+      "reference": "ServiceRequest/ORD-20260115-001"
+    }
+  ],
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+          "code": "RAD",
+          "display": "Radiology"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "18748-4",
+        "display": "Diagnostic Imaging Study"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/MRN-2024-78432"
+  },
+  "effectiveDateTime": "2026-05-27T12:01:37Z",
+  "issued": "2026-05-27T12:01:37Z",
+  "result": [
+    {
+      "reference": "Observation/ai-finding-128601007"
+    },
+    {
+      "reference": "Observation/ai-finding-60046008"
+    }
+  ],
+  "imagingStudy": [
+    {
+      "reference": "ImagingStudy/ACC-20260115-5678"
+    }
+  ],
+  "conclusion": "AI-detected findings: pneumonia and pleural effusion"
+}

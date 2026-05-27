@@ -1,0 +1,43 @@
+{
+  "resourceType": "ServiceRequest",
+  "id": "ORD-20260115-001",
+  "identifier": [
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "ACSN",
+            "display": "Accession ID"
+          }
+        ]
+      },
+      "value": "ACC-20260115-5678"
+    }
+  ],
+  "status": "completed",
+  "intent": "order",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "363679005",
+          "display": "Imaging"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "71020",
+        "display": "CHEST 2 VIEWS"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/MRN-2024-78432"
+  }
+}

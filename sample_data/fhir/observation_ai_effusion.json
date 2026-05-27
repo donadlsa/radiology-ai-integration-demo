@@ -1,0 +1,58 @@
+{
+  "resourceType": "Observation",
+  "id": "ai-finding-60046008",
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code": "imaging",
+          "display": "Imaging"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "60046008",
+        "display": "Pleural effusion"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/MRN-2024-78432"
+  },
+  "effectiveDateTime": "2026-05-27T12:01:37Z",
+  "performer": [
+    {
+      "display": "Radiology AI Engine v3.2"
+    }
+  ],
+  "derivedFrom": [
+    {
+      "reference": "ImagingStudy/ACC-20260115-5678"
+    }
+  ],
+  "component": [
+    {
+      "code": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "397003",
+            "display": "Degree of certainty"
+          }
+        ]
+      },
+      "valueQuantity": {
+        "value": 0.87,
+        "unit": "probability",
+        "system": "http://unitsofmeasure.org",
+        "code": "1"
+      }
+    }
+  ]
+}
