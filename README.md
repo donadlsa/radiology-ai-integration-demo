@@ -47,6 +47,7 @@ This project demonstrates hands-on coding for all three standards, connected thr
 ```bash
 # Install dependencies
 pip install -r requirements.txt
+pip install flask
 
 # Generate synthetic DICOM files
 python -m src.dicom_engine.generate_sample
@@ -54,8 +55,12 @@ python -m src.dicom_engine.generate_sample
 # Run the full integration pipeline
 python -m src.integration.pipeline
 
-# Run tests
+# Run tests (48 passing)
 pytest -v
+
+# Launch the operations dashboard
+python dashboard/app.py
+# Open http://localhost:5000
 ```
 
 ## What This Demonstrates
@@ -93,6 +98,27 @@ The end-to-end workflow tying all three standards together.
 - **pipeline.py** -- Orchestrates the full flow: receive order, match DICOM study, apply AI analysis, generate results in all three formats, route to destinations, and validate cross-format consistency.
 - **hl7_to_fhir.py** -- Convert HL7v2 ORU^R01 to a FHIR Transaction Bundle.
 - **dicom_to_fhir.py** -- Convert DICOM study metadata to FHIR ImagingStudy.
+
+## Integration Operations Dashboard (`dashboard/`)
+
+A web-based platform demonstrating how a Global Service Excellence Director would build the support technology stack for a radiology AI company. Run with `python dashboard/app.py` and open `http://localhost:5000`.
+
+### Monitoring
+- **Customer Health Overview** -- 8 hospital customers across Sectra, GE, Philips, Fujifilm, Agfa, Carestream, and Siemens with real-time integration status (HL7/DICOM/FHIR) per customer
+- **Diagnostics** -- Interactive tools powered by the code library: HL7 message parser, DICOM tag inspector, FHIR resource validator, and HL7/DICOM demographics comparator
+- **SLO Dashboard** -- Global uptime, time-to-acknowledge, time-to-resolve, first-contact resolution, and incident charts with per-customer SLO compliance tracking
+- **Configuration Registry** -- Single-pane view of all customer integration configurations (AE titles, HL7 endpoints, FHIR servers, auth types)
+
+### Troubleshooting
+- **Runbooks** -- 10 branching decision-tree troubleshooting workflows with embedded API diagnostic checks. Each runbook models real-world troubleshooting where the next step depends on what you find. Scenarios include: Study Not Reaching AI Engine, AI Results Not Appearing in PACS, Order/Image Mismatch, HL7 Interface Errors, Critical Result Not Delivered, FHIR API Failures, Duplicate Studies, Teleradiology Workflow Disruption, Customer Onboarding Validation, and Performance Degradation
+- **Flow Tracer** -- Traces a study's end-to-end journey through the integration pipeline (HL7 Order -> DICOM Image -> AI Analysis -> Results via HL7/DICOM SR/FHIR). Includes 6 scenarios: 1 healthy path and 5 error scenarios that detect failures and link to the relevant runbook
+- **Recurring Patterns** -- Cross-customer incident pattern detection that identifies recurring issues (SR description mismatches, facility code changes, FHIR token expiry) and recommends permanent engineering fixes with projected ticket deflection impact
+
+### Operations
+- **Major Incidents** -- P1 incident simulation with incident timeline, interactive status workflow (Detected -> Acknowledged -> Investigating -> Mitigated -> Resolved), and post-incident review with root cause analysis, metrics (TTA, TTRC, TTM), and assigned action items
+- **Follow-the-Sun Coverage** -- 3-region shift display (APAC/EMEA/Americas) with live clock, on-call team members, shift handoff log with context notes, and team capacity metrics
+- **Customer Self-Service Portal** -- What a customer's IT team sees: integration health check, HL7 message tester, DICOM routing verification checklist, and ticket submission. Includes staff-view ticket deflection metrics (26% deflection rate)
+- **CEO Report** -- Executive summary with global KPIs, customer health table, risk register (4 active risks with severity/mitigation/owner), investment recommendations with ROI projections, team status, and next-month priorities. Designed for board-level presentation.
 
 ## Sample Data
 
